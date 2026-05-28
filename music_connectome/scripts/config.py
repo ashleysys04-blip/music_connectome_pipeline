@@ -1,6 +1,6 @@
 """
-config.py — central configuration. Edit paths/column names here if your data layout differs.
-Project: Early Musical Training, Episodic Memory, and Functional Brain Network Organization
+config.py - central configuration for HCP-D structural-connectivity pipeline.
+Project: Early Musical Training, Episodic Memory, and White-Matter Network Organization
 """
 from pathlib import Path
 
@@ -14,52 +14,62 @@ FIG_DIR  = PROJECT_ROOT / "figures"
 for d in [PROC_DIR, OUT_DIR, FIG_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
-# NDA-format files. Row 0 = header, Row 1 = NDA dictionary (skip), Row 2+ = data
+# Behavioral / demographic NDA files (HCP-D)
+NDA_DIR = RAW_DIR / "behavioral" / "hcp-d"
 NDA_FILES = {
-    "subject" : RAW_DIR / "ndar_subject01.txt",
-    "music"   : RAW_DIR / "saiq01.txt",
-    "psm"     : RAW_DIR / "psm01.txt",
-    "flanker" : RAW_DIR / "flanker01.txt",
-    "dccs"    : RAW_DIR / "dccs01.txt",
-    "lswmt"   : RAW_DIR / "lswmt01.txt",
-    "pcps"    : RAW_DIR / "pcps01.txt",
-    "wisc"    : RAW_DIR / "wisc_v01.txt",
+    "subject" : NDA_DIR / "ndar_subject01.txt",
+    "music"   : NDA_DIR / "saiq01.txt",
+    "psm"     : NDA_DIR / "psm01.txt",
+    "flanker" : NDA_DIR / "flanker01.txt",
+    "dccs"    : NDA_DIR / "dccs01.txt",
+    "lswmt"   : NDA_DIR / "lswmt01.txt",
+    "pcps"    : NDA_DIR / "pcps01.txt",
+    "wisc"    : NDA_DIR / "wisc_v01.txt",
 }
 
-ATLAS_FILE = RAW_DIR / "subregion_func_network_Yeo_updated_wt_subcortical.csv"
+# Atlas
+ATLAS_FILE = RAW_DIR / "Brainnetome_atlas" / "subregion_func_network_Yeo_updated_wt_subcortical.csv"
 
-# ROI time series. Expected: data/raw/timeseries/<SUB>_timeseries.csv (T × N=246)
-TIMESERIES_DIR = RAW_DIR / "timeseries"
-TIMESERIES_PATTERN = "*_timeseries.csv"
-
-# Motion: subject_id, mean_fd
-MOTION_FILE = RAW_DIR / "motion_meanfd.csv"
+# Structural connectome (DSI Studio QSDR output, one .mat per subject)
+# Each file is e.g. HCD0001305_qsdr_connectivity.mat with key "connectivity" (246x246)
+SC_DIR     = RAW_DIR / "structural_connectome" / "hcp-d"
+SC_PATTERN = "*_qsdr_connectivity.mat"
+SC_KEY     = "connectivity"
 
 # NDA column names
 COL_SUBJECT_ID = "src_subject_id"
 COL_AGE        = "interview_age"   # months
 COL_SEX        = "sex"
 
-# Music variables (SAIQ)
-MUSIC_YEARS_COL  = "ccf_sai_p_music_nyr"
-MUSIC_MONTHS_COL = "ccf_sai_p_music_yrm"
-MUSIC_DPW_COL    = "ccf_sai_p_music_dpw"
-MUSIC_MIN_COL    = "ccf_sai_p_music_min"
+# Music variables in saiq01.txt (verified against actual HCP-D file)
+MUSIC_YEARS_COL  = "ccf_sai_p_music_nyr"      # years of training
+MUSIC_MONTHS_COL = "ccf_sai_p_music_nmonth"   # active months per year
+MUSIC_DPW_COL    = "ccf_sai_p_music_perwk"    # days per week
+MUSIC_MIN_COL    = "ccf_sai_p_music_tspent"   # minutes per session
 
-# NIH Toolbox / WISC outcome columns (age-corrected std scores)
-PSM_SCORE_COL = "tlbx_picseq_agecorrected"
-FLANKER_COL   = "nih_flanker_agecorrected"
-DCCS_COL      = "nih_dccs_agecorrected"
-LSWMT_COL     = "nih_lswmt_agecorrected"
-PCPS_COL      = "nih_pcps_agecorrected"
-WISC_MR_COL   = "pea_wiscv_mr_tscore"
+# NIH Toolbox / WISC outcomes (verified)
+PSM_SCORE_COL = "nih_picseq_ageadjusted"
+FLANKER_COL   = "nih_flanker_ageadjusted"
+DCCS_COL      = "nih_dccs_ageadjusted"
+LSWMT_COL     = "age_corrected_standard_score"   # lswmt01 col name
+PCPS_COL      = "nih_patterncomp_ageadjusted"
+WISC_MR_COL   = "scaled_matrix"                  # WISC-V Matrix Reasoning scaled score
 
 # QC
-MEAN_FD_MAX  = 0.5
-MIN_TR_COUNT = 100
 ATLAS_N_ROI  = 246
+MIN_NONZERO_EDGES = 100  # SC matrix must have at least this many positive off-diag edges
 
-# Networks of interest (Yeo 7-network names; substring match)
+# Yeo 7-network code mapping (numeric in atlas)
+#   1=Visual  2=Somatomotor  3=DorsAttn  4=VentAttn/Salience
+#   5=Limbic  6=Frontoparietal  7=Default  8-11=Subcortical
+YEO_CODE_TO_NAME = {
+    1: "Visual", 2: "SomMot", 3: "DorsAttn", 4: "SalVentAttn",
+    5: "Limbic", 6: "Frontoparietal", 7: "Default",
+    8: "SubCx_8", 9: "SubCx_9", 10: "SubCx_10", 11: "SubCx_11",
+}
+
+# Networks of interest for music-memory hypotheses.
+# DMN/FPN/Limbic correspond directly to Yeo codes 7/6/5.
 NETWORKS_OF_INTEREST = {
     "DMN": "Default",
     "FPN": "Frontoparietal",
@@ -69,12 +79,15 @@ NETWORKS_OF_INTEREST = {
 ONSET_GROUPS = {"early": (0, 7), "middle": (7, 12), "late": (12, 99)}
 
 # Stats
-RANDOM_SEED      = 42
-N_PERMUTATIONS   = 5000
-N_BOOTSTRAP      = 5000
-FDR_ALPHA        = 0.05
-GRAPH_THRESHOLDS = [0.10, 0.15, 0.20]
+RANDOM_SEED       = 42
+N_BOOTSTRAP       = 5000
+FDR_ALPHA         = 0.05
+GRAPH_THRESHOLDS  = [0.10, 0.15, 0.20]
 GRAPH_PRIMARY_THR = 0.15
+
+# Whether to log-transform SC weights before graph metrics.
+# DSI Studio streamline counts are heavy-tailed; log1p stabilizes them.
+SC_LOG_TRANSFORM = True
 
 PRIMARY_GRAPH_METRICS = [
     "global_efficiency", "char_path_length", "mean_clustering",

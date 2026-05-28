@@ -1,13 +1,20 @@
 """
-pipeline.py
-===========
-Full 8-step analysis pipeline as importable functions.
-Each step writes its outputs to outputs/ and reads inputs from the previous step.
+pipeline.py — full 8-step analysis pipeline (structural connectivity version)
+=============================================================================
+For HCP-D data:
+  - Structural connectivity matrices (DSI Studio QSDR, 246x246, .mat files)
+  - Behavioral NDA .txt files (saiq, psm, flanker, dccs, lswmt, pcps, wisc, subject)
+  - Brainnetome atlas with Yeo 7-network assignment
 
-Usage:
-    from pipeline import step1, step2, step3, step4, step5, step6, step7, step8
-
-Or run all steps via run_all.py.
+Steps:
+  1. Data preparation (NDA -> analysis_sample.csv)
+  2. Load structural connectivity matrices
+  3. Compute graph metrics + within/between-network SC features
+  4. Brain -> PSM GLM
+  5. Music -> PSM GLM
+  6. Music -> Brain GLM
+  7. Mediation:  music_onset -> brain -> PSM
+  8. Figures + summary
 """
 
 import warnings
@@ -15,6 +22,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from pathlib import Path
+from scipy.io import loadmat
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
 
@@ -35,13 +43,14 @@ def read_nda(path):
 
 def derive_music_variables(saiq, demo):
     df = saiq.merge(demo[[C.COL_SUBJECT_ID, C.COL_AGE]],
-                    on=C.COL_SUBJECT_ID, how="left")
-    for c in [C.COL_AGE, C.MUSIC_YEARS_COL, C.MUSIC_MONTHS_COL,
+                    on=C.COL_SUBJECT_ID, how="left", suffixes=("", "_demo"))
+    age_col_use = C.COL_AGE if C.COL_AGE in df.columns else f"{C.COL_AGE}_demo"
+    for c in [age_col_use, C.MUSIC_YEARS_COL, C.MUSIC_MONTHS_COL,
               C.MUSIC_DPW_COL, C.MUSIC_MIN_COL]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    age_yr = df[C.COL_AGE] / 12.0
+    age_yr = df[age_col_use] / 12.0
     years  = df[C.MUSIC_YEARS_COL]
     months = df[C.MUSIC_MONTHS_COL]
     dpw    = df[C.MUSIC_DPW_COL]
@@ -56,7 +65,7 @@ def derive_music_variables(saiq, demo):
         "music_years": years,
         "music_onset_age": onset_age,
         "cumulative_hours": cum_hours,
-        "log_cumulative_hours": np.log1p(cum_hours),
+        "log_cumulative_hours": np.log1p(cum_hours.clip(lower=0)),
         "music_training_status": (years.fillna(0) > 0).astype(int),
     })
 
@@ -69,16 +78,8 @@ def derive_music_variables(saiq, demo):
     return out.drop_duplicates(subset=[C.COL_SUBJECT_ID])
 
 
-def fisher_z(r):
-    r = np.clip(r, -0.9999, 0.9999)
-    return np.arctanh(r)
-
-
 def zero_diag(A):
-    A = A.copy()
-    np.fill_diagonal(A, 0.0)
-    return A
-
+    A = A.copy(); np.fill_diagonal(A, 0.0); return A
 
 def symmetrize(A):
     return 0.5 * (A + A.T)
@@ -100,19 +101,18 @@ def threshold_proportional(W, p):
 
 
 def load_atlas():
+    """
+    Return DataFrame with columns ['roi_idx' (0-indexed), 'network' (str name)]
+    from the Brainnetome+Yeo CSV. Uses YEO_CODE_TO_NAME mapping.
+    """
     df = pd.read_csv(C.ATLAS_FILE)
-    roi_cands = ["roi_idx", "ROI", "roi_id", "Label", "index", "Index", "ID"]
-    net_cands = ["network", "Network", "Yeo_Network", "Yeo7", "yeo7", "yeo_network"]
-    roi_col = next((c for c in roi_cands if c in df.columns), None)
-    net_col = next((c for c in net_cands if c in df.columns), None)
-    if roi_col is None:
-        df = df.reset_index().rename(columns={"index": "roi_idx"})
-        roi_col = "roi_idx"
-    if net_col is None:
-        raise ValueError(f"No network column found. Atlas columns: {df.columns.tolist()}")
-    out = df[[roi_col, net_col]].rename(columns={roi_col: "roi_idx", net_col: "network"})
-    if out["roi_idx"].min() == 1:
-        out["roi_idx"] = out["roi_idx"] - 1
+    if "Label" not in df.columns or "Yeo_7network_SubC" not in df.columns:
+        raise ValueError(f"Atlas missing expected columns. Found: {df.columns.tolist()}")
+    out = pd.DataFrame({
+        "roi_idx": df["Label"].astype(int) - 1,  # 0-indexed
+        "network_code": df["Yeo_7network_SubC"].astype(int),
+    })
+    out["network"] = out["network_code"].map(C.YEO_CODE_TO_NAME).fillna("Unknown")
     return out.sort_values("roi_idx").reset_index(drop=True)
 
 
@@ -170,25 +170,22 @@ def step1():
 
     saiq = read_nda(C.NDA_FILES["music"])
     music = derive_music_variables(saiq, demo)
-    print(f"  music vars:   {len(music)}")
+    print(f"  music vars:   {len(music)} (trained={(music['music_training_status']==1).sum()})")
 
-    # Cognitive
-    spec = [("psm", C.PSM_SCORE_COL, "psm_score"),
-            ("flanker", C.FLANKER_COL, "flanker"),
-            ("dccs", C.DCCS_COL, "dccs"),
-            ("lswmt", C.LSWMT_COL, "lswmt"),
-            ("pcps", C.PCPS_COL, "pcps"),
-            ("wisc", C.WISC_MR_COL, "wisc_mr")]
+    spec = [("psm",     C.PSM_SCORE_COL, "psm_score"),
+            ("flanker", C.FLANKER_COL,   "flanker"),
+            ("dccs",    C.DCCS_COL,      "dccs"),
+            ("lswmt",   C.LSWMT_COL,     "lswmt"),
+            ("pcps",    C.PCPS_COL,      "pcps"),
+            ("wisc",    C.WISC_MR_COL,   "wisc_mr")]
     cog = None
     for key, col, newname in spec:
         path = C.NDA_FILES[key]
         if not path.exists():
-            print(f"  [warn] {path.name} missing — skipping {newname}")
-            continue
+            print(f"  [warn] {path.name} missing — skipping {newname}"); continue
         df = read_nda(path)
         if col not in df.columns:
-            print(f"  [warn] {col} not in {path.name} — skipping {newname}")
-            continue
+            print(f"  [warn] '{col}' not in {path.name} — skipping {newname}"); continue
         sub = df[[C.COL_SUBJECT_ID, col]].copy()
         sub[col] = pd.to_numeric(sub[col], errors="coerce")
         sub = sub.rename(columns={col: newname}).drop_duplicates(subset=[C.COL_SUBJECT_ID])
@@ -197,114 +194,106 @@ def step1():
         raise RuntimeError("No cognitive data loaded.")
     print(f"  cognitive:    {len(cog)}")
 
-    # Motion
-    if C.MOTION_FILE.exists():
-        mot = pd.read_csv(C.MOTION_FILE)
-        if "subject_id" in mot.columns and C.COL_SUBJECT_ID not in mot.columns:
-            mot = mot.rename(columns={"subject_id": C.COL_SUBJECT_ID})
-        mot = mot[[C.COL_SUBJECT_ID, "mean_fd"]].drop_duplicates(subset=[C.COL_SUBJECT_ID])
-    else:
-        print(f"  [warn] motion file {C.MOTION_FILE.name} missing — mean_fd will be NaN")
-        mot = pd.DataFrame(columns=[C.COL_SUBJECT_ID, "mean_fd"])
-
     df = (demo.merge(music.drop(columns=["age_years"], errors="ignore"),
                      on=C.COL_SUBJECT_ID, how="left")
-              .merge(cog, on=C.COL_SUBJECT_ID, how="left")
-              .merge(mot, on=C.COL_SUBJECT_ID, how="left"))
+              .merge(cog, on=C.COL_SUBJECT_ID, how="left"))
     df["age_years"] = df[C.COL_AGE] / 12.0
     if C.COL_SEX in df.columns:
         df["sex_code"] = df[C.COL_SEX].map(
             {"M": 0, "F": 1, "m": 0, "f": 1}).astype(float)
 
-    # QC
+    # Require primary outcome
     n0 = len(df)
     df = df.dropna(subset=["psm_score"])
     print(f"  after psm non-missing: {len(df)} (-{n0-len(df)})")
-    if df["mean_fd"].notna().any():
-        n0 = len(df)
-        df = df[(df["mean_fd"].isna()) | (df["mean_fd"] <= C.MEAN_FD_MAX)]
-        print(f"  after mean_fd <= {C.MEAN_FD_MAX}: {len(df)} (-{n0-len(df)})")
 
     df.to_csv(C.OUT_DIR / "analysis_sample.csv", index=False)
     print(f"  saved -> analysis_sample.csv  (n={len(df)})")
 
-    desc_cols = [c for c in ["age_years", "sex_code", "mean_fd", "music_onset_age",
+    desc_cols = [c for c in ["age_years", "sex_code", "music_onset_age",
                              "music_years", "cumulative_hours", "log_cumulative_hours",
                              "psm_score", "flanker", "dccs", "lswmt", "pcps", "wisc_mr"]
                  if c in df.columns]
     desc = df[desc_cols].describe().T
     desc["n_nonmissing"] = df[desc_cols].notna().sum().values
     desc.to_csv(C.OUT_DIR / "descriptive_statistics.csv")
+
+    if "early_onset_group" in df.columns:
+        print("  Onset group counts:")
+        print(df["early_onset_group"].value_counts(dropna=False).to_string())
     return df
 
 
 # =============================================================================
-# STEP 2 — FC matrices
+# STEP 2 — Load structural connectivity matrices
 # =============================================================================
-def _find_ts(sub_id):
-    cands = list(C.TIMESERIES_DIR.glob(f"{sub_id}*timeseries*"))
-    cands += list(C.TIMESERIES_DIR.glob(f"{sub_id}*_ts.*"))
-    cands += list(C.TIMESERIES_DIR.glob(f"{sub_id}.csv"))
-    cands += list(C.TIMESERIES_DIR.glob(f"{sub_id}.txt"))
-    return cands[0] if cands else None
-
-
-def _load_ts(path):
-    sep = "\t" if path.suffix in (".tsv", ".txt") else ","
-    df = pd.read_csv(path, sep=sep, header=None, engine="python")
-    if df.iloc[0].apply(lambda v: isinstance(v, str)).any():
-        df = pd.read_csv(path, sep=sep, header=0, engine="python")
-    arr = df.to_numpy(dtype=np.float32)
-    if arr.shape[0] == C.ATLAS_N_ROI and arr.shape[1] != C.ATLAS_N_ROI:
-        arr = arr.T
-    return arr
-
-
-def _compute_fc(ts):
-    ts = ts - ts.mean(axis=0, keepdims=True)
-    sd = ts.std(axis=0, ddof=1, keepdims=True); sd[sd == 0] = 1.0
-    ts = ts / sd
-    n = ts.shape[0]
-    R = symmetrize(zero_diag((ts.T @ ts) / (n - 1)))
-    Z = fisher_z(R)
-    np.fill_diagonal(Z, 0.0)
-    return Z.astype(np.float32)
+def _load_sc(sub_id):
+    """Find and load a subject's QSDR SC matrix. Returns 246x246 or None."""
+    pats = [
+        f"{sub_id}_qsdr_connectivity.mat",
+        f"{sub_id}*qsdr*connectivity*.mat",
+        f"{sub_id}*.mat",
+    ]
+    for pat in pats:
+        cands = list(C.SC_DIR.glob(pat))
+        if cands:
+            try:
+                m = loadmat(cands[0])
+                if C.SC_KEY in m:
+                    A = np.asarray(m[C.SC_KEY], dtype=np.float64)
+                else:
+                    keys = [k for k in m.keys() if not k.startswith("__")]
+                    if not keys: return None
+                    A = np.asarray(m[keys[0]], dtype=np.float64)
+                if A.shape != (C.ATLAS_N_ROI, C.ATLAS_N_ROI):
+                    return None
+                return A
+            except Exception:
+                return None
+    return None
 
 
 def step2():
-    print("\n=== Step 2: FC matrices ===")
-    fc_dir = C.PROC_DIR / "fc"
-    fc_dir.mkdir(parents=True, exist_ok=True)
+    print("\n=== Step 2: Load structural connectivity ===")
+    sc_proc = C.PROC_DIR / "sc"
+    sc_proc.mkdir(parents=True, exist_ok=True)
     sample = pd.read_csv(C.OUT_DIR / "analysis_sample.csv")
-    if not C.TIMESERIES_DIR.exists():
-        raise FileNotFoundError(f"Time series dir not found: {C.TIMESERIES_DIR}")
+    if not C.SC_DIR.exists():
+        raise FileNotFoundError(f"SC dir not found: {C.SC_DIR}")
+
     qc_rows = []
-    for sub in tqdm(sample[C.COL_SUBJECT_ID].astype(str), desc="FC"):
-        p = _find_ts(sub)
-        if p is None:
-            qc_rows.append(dict(subject=sub, used=False, note="no_file")); continue
-        try:
-            ts = _load_ts(p)
-        except Exception as e:
-            qc_rows.append(dict(subject=sub, used=False, note=f"load_err:{e}")); continue
-        if ts.shape[1] != C.ATLAS_N_ROI:
-            qc_rows.append(dict(subject=sub, used=False, note=f"wrong_N={ts.shape[1]}")); continue
-        if ts.shape[0] < C.MIN_TR_COUNT:
-            qc_rows.append(dict(subject=sub, used=False, note=f"short_T={ts.shape[0]}")); continue
-        Z = _compute_fc(ts)
-        r_off = np.tanh(Z[np.triu_indices(C.ATLAS_N_ROI, k=1)])
-        np.save(fc_dir / f"{sub}_fc.npy", Z)
-        qc_rows.append(dict(subject=sub, n_timepoints=ts.shape[0],
-                            mean_abs_r=float(np.nanmean(np.abs(r_off))),
-                            used=True, note=""))
+    found_subjects = []
+    for sub in tqdm(sample[C.COL_SUBJECT_ID].astype(str), desc="SC"):
+        A = _load_sc(sub)
+        if A is None:
+            qc_rows.append(dict(subject=sub, used=False, note="no_file_or_bad_shape"))
+            continue
+        A = symmetrize(zero_diag(A))
+        n_pos = int((A[np.triu_indices(C.ATLAS_N_ROI, 1)] > 0).sum())
+        if n_pos < C.MIN_NONZERO_EDGES:
+            qc_rows.append(dict(subject=sub, used=False, n_pos_edges=n_pos,
+                                note=f"too_sparse"))
+            continue
+        # Optional log1p stabilization (kept on disk for reuse)
+        if C.SC_LOG_TRANSFORM:
+            A_stable = np.log1p(np.clip(A, 0, None))
+        else:
+            A_stable = A.astype(np.float32)
+        np.save(sc_proc / f"{sub}_sc.npy", A_stable.astype(np.float32))
+        qc_rows.append(dict(subject=sub, used=True, n_pos_edges=n_pos,
+                            mean_w=float(A[A > 0].mean()),
+                            max_w=float(A.max()), note=""))
+        found_subjects.append(sub)
+
     qc = pd.DataFrame(qc_rows)
-    qc.to_csv(C.OUT_DIR / "fc_qc.csv", index=False)
+    qc.to_csv(C.OUT_DIR / "sc_qc.csv", index=False)
     print(f"  used: {qc['used'].sum()} / {len(qc)}")
-    return qc
+    print(f"  saved processed SC -> {sc_proc}")
+    print(f"  saved QC          -> sc_qc.csv")
 
 
 # =============================================================================
-# STEP 3 — Graph metrics
+# STEP 3 — Graph metrics + within/between network SC features
 # =============================================================================
 try:
     import bct
@@ -348,7 +337,7 @@ def _modularity(W):
     return nx.algorithms.community.modularity(G, comms, weight="weight")
 
 
-def _small_world(W, n_rand=10):
+def _small_world(W, n_rand=5):
     Cr, Lr = _clustering(W), _char_path(W)
     Cs, Ls = [], []
     rng = np.random.default_rng(C.RANDOM_SEED)
@@ -373,12 +362,11 @@ def _all_global(W):
                 small_worldness=_small_world(W))
 
 
-def _network_features(Z, atlas):
+def _network_features(W, atlas):
+    """Mean SC weight within/between target networks (DMN/MTL/FPN)."""
     masks = {}
-    for short, long_name in C.NETWORKS_OF_INTEREST.items():
-        idx = atlas.index[
-            atlas["network"].astype(str).str.contains(long_name, case=False, na=False)
-        ].to_numpy()
+    for short, full_name in C.NETWORKS_OF_INTEREST.items():
+        idx = atlas.index[atlas["network"] == full_name].to_numpy()
         masks[short] = idx
     feats = {}
     keys = list(masks.keys())
@@ -387,7 +375,7 @@ def _network_features(Z, atlas):
         if len(idx_i) < 2:
             feats[f"{k}_within"] = np.nan
         else:
-            sub = Z[np.ix_(idx_i, idx_i)]
+            sub = W[np.ix_(idx_i, idx_i)]
             iu = np.triu_indices(len(idx_i), k=1)
             feats[f"{k}_within"] = float(np.nanmean(sub[iu]))
         for j in range(i + 1, len(keys)):
@@ -395,7 +383,7 @@ def _network_features(Z, atlas):
             if len(idx_i) == 0 or len(idx_j) == 0:
                 feats[f"{k}_{kj}_between"] = np.nan
             else:
-                feats[f"{k}_{kj}_between"] = float(np.nanmean(Z[np.ix_(idx_i, idx_j)]))
+                feats[f"{k}_{kj}_between"] = float(np.nanmean(W[np.ix_(idx_i, idx_j)]))
     return feats
 
 
@@ -403,29 +391,36 @@ def step3():
     print(f"\n=== Step 3: Graph metrics  (backend: {'bctpy' if HAVE_BCT else 'networkx'}) ===")
     sample = pd.read_csv(C.OUT_DIR / "analysis_sample.csv")
     atlas = load_atlas()
-    fc_dir = C.PROC_DIR / "fc"
+    sc_proc = C.PROC_DIR / "sc"
+    print(f"  network sizes: " + ", ".join(
+        f"{k}={ (atlas['network']==v).sum() }" for k,v in C.NETWORKS_OF_INTEREST.items()))
+
     rows_primary, rows_all, rows_net = [], [], []
     for sub in tqdm(sample[C.COL_SUBJECT_ID].astype(str), desc="metrics"):
-        p = fc_dir / f"{sub}_fc.npy"
+        p = sc_proc / f"{sub}_sc.npy"
         if not p.exists(): continue
-        Z = np.load(p)
-        nf = _network_features(Z, atlas); nf[C.COL_SUBJECT_ID] = sub
+        W = np.load(p).astype(np.float64)
+
+        nf = _network_features(W, atlas); nf[C.COL_SUBJECT_ID] = sub
         rows_net.append(nf)
+
         for thr in C.GRAPH_THRESHOLDS:
-            W = threshold_proportional(Z, thr)
-            Wp = np.where(W > 0, W, 0.0)
+            Wt = threshold_proportional(W, thr)
+            Wp = np.where(Wt > 0, Wt, 0.0)
             g = _all_global(Wp)
             rows_all.append({C.COL_SUBJECT_ID: sub, "threshold": thr, **g})
             if thr == C.GRAPH_PRIMARY_THR:
                 rows_primary.append({C.COL_SUBJECT_ID: sub, **g})
+
     pd.DataFrame(rows_primary).to_csv(C.OUT_DIR / "graph_metrics.csv", index=False)
     pd.DataFrame(rows_all).to_csv(C.OUT_DIR / "graph_metrics_all_thr.csv", index=False)
     pd.DataFrame(rows_net).to_csv(C.OUT_DIR / "network_features.csv", index=False)
-    print("  saved -> graph_metrics.csv, graph_metrics_all_thr.csv, network_features.csv")
+    print(f"  saved -> graph_metrics.csv  ({len(rows_primary)} subjects)")
+    print(f"  saved -> network_features.csv")
 
 
 # =============================================================================
-# STEP 4 — Brain → Episodic memory
+# STEP 4 — Brain -> PSM
 # =============================================================================
 def step4():
     print("\n=== Step 4: Brain -> PSM ===")
@@ -436,9 +431,9 @@ def step4():
                .merge(netfc, on=C.COL_SUBJECT_ID, how="inner")
     print(f"  n = {len(df)}")
     family = C.PRIMARY_GRAPH_METRICS + C.PRIMARY_NETWORK_FEATURES
-    df = standardize(df, ["age_years", "mean_fd", "wisc_mr", "psm_score"] +
+    df = standardize(df, ["age_years", "wisc_mr", "psm_score"] +
                      [c for c in family if c in df.columns])
-    covs = [c for c in ["age_years", "sex_code", "mean_fd", "wisc_mr"]
+    covs = [c for c in ["age_years", "sex_code", "wisc_mr"]
             if c in df.columns and df[c].notna().any()]
     rows = []
     for feat in family:
@@ -457,10 +452,10 @@ def step4():
 
 
 # =============================================================================
-# STEP 5 — Music → Episodic memory
+# STEP 5 — Music -> PSM
 # =============================================================================
 def _run_music_models(df, y_col):
-    covs = [c for c in ["age_years", "sex_code", "mean_fd", "wisc_mr"]
+    covs = [c for c in ["age_years", "sex_code", "wisc_mr"]
             if c in df.columns and df[c].notna().any()]
     out = []
     r = fit_ols(df, y_col, ["music_onset_age"], covs)
@@ -498,7 +493,7 @@ def step5():
     df_all = pd.read_csv(C.OUT_DIR / "analysis_sample.csv")
     df = df_all[df_all["music_training_status"] == 1].copy()
     print(f"  trained-only n = {len(df)}")
-    df = standardize(df, ["age_years", "mean_fd", "wisc_mr",
+    df = standardize(df, ["age_years", "wisc_mr",
                           "music_onset_age", "log_cumulative_hours",
                           "psm_score", "flanker", "dccs", "lswmt", "pcps"])
     primary = pd.DataFrame(_run_music_models(df, "psm_score"))
@@ -522,7 +517,7 @@ def step5():
 
 
 # =============================================================================
-# STEP 6 — Music → Brain
+# STEP 6 — Music -> Brain
 # =============================================================================
 def step6():
     print("\n=== Step 6: Music -> Brain ===")
@@ -534,10 +529,10 @@ def step6():
     df = df[df["music_training_status"] == 1].copy()
     print(f"  trained-only with brain n = {len(df)}")
     family = C.PRIMARY_GRAPH_METRICS + C.PRIMARY_NETWORK_FEATURES
-    df = standardize(df, ["age_years", "mean_fd", "wisc_mr",
+    df = standardize(df, ["age_years", "wisc_mr",
                           "music_onset_age", "log_cumulative_hours"] +
                      [c for c in family if c in df.columns])
-    covs = [c for c in ["age_years", "sex_code", "mean_fd", "wisc_mr"]
+    covs = [c for c in ["age_years", "sex_code", "wisc_mr"]
             if c in df.columns and df[c].notna().any()]
     rows = []
     for feat in family:
@@ -550,7 +545,6 @@ def step6():
                              t=r[f"t_{pp}"], p=r[f"p_{pp}"], r2=r["r2"]))
     res = pd.DataFrame(rows)
     if len(res):
-        # FDR per predictor across brain features
         out = []
         for pp, grp in res.groupby("predictor"):
             out.append(apply_fdr(grp, p_col="p"))
@@ -561,28 +555,20 @@ def step6():
 
 
 # =============================================================================
-# STEP 7 — Mediation: Music onset -> Brain -> PSM
+# STEP 7 — Mediation
 # =============================================================================
 def _bootstrap_indirect(df, x, m, y, covs, n_boot=None):
-    """
-    Simple nonparametric bootstrap of the indirect effect a*b in:
-        m ~ x + covs       (a path)
-        y ~ x + m + covs   (b path; c' = direct effect of x)
-    Returns dict with a, b, c (total), c_prime (direct), ab, ci_low, ci_high, p.
-    """
     if n_boot is None: n_boot = C.N_BOOTSTRAP
     cols = [x, m, y] + covs
     sub = df[cols].dropna().reset_index(drop=True)
-    if len(sub) < 30:
-        return None
+    if len(sub) < 30: return None
 
     def _fit(d):
         Xa = sm.add_constant(d[[x] + covs], has_constant="add")
         a = sm.OLS(d[m], Xa).fit().params.get(x, np.nan)
         Xb = sm.add_constant(d[[x, m] + covs], has_constant="add")
         b_fit = sm.OLS(d[y], Xb).fit()
-        b = b_fit.params.get(m, np.nan)
-        cp = b_fit.params.get(x, np.nan)
+        b = b_fit.params.get(m, np.nan); cp = b_fit.params.get(x, np.nan)
         Xc = sm.add_constant(d[[x] + covs], has_constant="add")
         c = sm.OLS(d[y], Xc).fit().params.get(x, np.nan)
         return a, b, c, cp
@@ -598,10 +584,8 @@ def _bootstrap_indirect(df, x, m, y, covs, n_boot=None):
         except Exception:
             ab_boot[i] = np.nan
     ab_boot = ab_boot[~np.isnan(ab_boot)]
-    if len(ab_boot) < 100:
-        return None
+    if len(ab_boot) < 100: return None
     lo, hi = np.percentile(ab_boot, [2.5, 97.5])
-    # two-sided "p" via proportion of resamples crossing 0
     p_boot = 2 * min((ab_boot >= 0).mean(), (ab_boot <= 0).mean())
     return dict(a=a, b=b, c=c, c_prime=cp, ab=a * b,
                 ci_low=lo, ci_high=hi, p_boot=p_boot, n=len(sub))
@@ -616,11 +600,10 @@ def step7():
                .merge(netfc, on=C.COL_SUBJECT_ID, how="inner")
     df = df[df["music_training_status"] == 1].copy()
     family = C.PRIMARY_GRAPH_METRICS + C.PRIMARY_NETWORK_FEATURES
-    df = standardize(df, ["age_years", "mean_fd", "wisc_mr",
+    df = standardize(df, ["age_years", "wisc_mr",
                           "music_onset_age", "log_cumulative_hours", "psm_score"] +
                      [c for c in family if c in df.columns])
-    covs = [c for c in ["age_years", "sex_code", "mean_fd", "wisc_mr",
-                        "log_cumulative_hours"]
+    covs = [c for c in ["age_years", "sex_code", "wisc_mr", "log_cumulative_hours"]
             if c in df.columns and df[c].notna().any()]
     rows = []
     for feat in family:
@@ -646,9 +629,8 @@ def step8():
     plt.rcParams["figure.dpi"] = 120
 
     sample = pd.read_csv(C.OUT_DIR / "analysis_sample.csv")
-
-    # Fig 1: distribution of music_onset_age in trained sample
     trained = sample[sample["music_training_status"] == 1]
+
     if len(trained):
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.hist(trained["music_onset_age"].dropna(), bins=20, edgecolor="black")
@@ -659,7 +641,6 @@ def step8():
         plt.savefig(C.FIG_DIR / "fig1_onset_distribution.png", dpi=150)
         plt.close()
 
-    # Fig 2: PSM by onset group
     if "early_onset_group" in sample.columns and sample["psm_score"].notna().any():
         groups = ["early", "middle", "late"]
         data = [sample.loc[sample["early_onset_group"] == g, "psm_score"].dropna()
@@ -667,13 +648,12 @@ def step8():
         ns = [len(d) for d in data]
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.boxplot(data, labels=[f"{g}\n(n={n})" for g, n in zip(groups, ns)])
-        ax.set_ylabel("Picture Sequence Memory (age-corr.)")
+        ax.set_ylabel("Picture Sequence Memory (age-corrected)")
         ax.set_title("PSM by music onset group")
         plt.tight_layout()
         plt.savefig(C.FIG_DIR / "fig2_psm_by_group.png", dpi=150)
         plt.close()
 
-    # Fig 3: top brain-behavior associations
     bb_path = C.OUT_DIR / "glm_brain_behavior.csv"
     if bb_path.exists():
         bb = pd.read_csv(bb_path)
@@ -688,7 +668,6 @@ def step8():
             plt.savefig(C.FIG_DIR / "fig3_brain_behavior.png", dpi=150)
             plt.close()
 
-    # Fig 4: mediation indirect effects
     med_path = C.OUT_DIR / "mediation_results.csv"
     if med_path.exists():
         med = pd.read_csv(med_path)
@@ -706,17 +685,16 @@ def step8():
             plt.savefig(C.FIG_DIR / "fig4_mediation.png", dpi=150)
             plt.close()
 
-    # Summary report
     summary = ["# Analysis Summary\n"]
-    summary.append(f"## Sample\n- N (after QC): {len(sample)}\n")
+    summary.append(f"\n## Sample\n- N after QC: {len(sample)}\n")
     if "music_training_status" in sample.columns:
         n_tr = int((sample["music_training_status"] == 1).sum())
         summary.append(f"- N trained: {n_tr}\n")
     for name, path in [
-        ("Brain -> PSM", C.OUT_DIR / "glm_brain_behavior.csv"),
+        ("Brain -> PSM",           C.OUT_DIR / "glm_brain_behavior.csv"),
         ("Music -> PSM (primary)", C.OUT_DIR / "glm_music_behavior.csv"),
-        ("Music -> Brain", C.OUT_DIR / "glm_music_brain.csv"),
-        ("Mediation",  C.OUT_DIR / "mediation_results.csv"),
+        ("Music -> Brain",         C.OUT_DIR / "glm_music_brain.csv"),
+        ("Mediation",              C.OUT_DIR / "mediation_results.csv"),
     ]:
         if path.exists():
             d = pd.read_csv(path)
