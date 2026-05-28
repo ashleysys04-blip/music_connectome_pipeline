@@ -44,6 +44,18 @@ project/
 
 ## 실행
 
+
+```bash
+cd music_connectome
+pip install -r requirements.txt
+pip install bctpy  # optional but recommended
+# 데이터를 data/raw/ 에 배치
+cd scripts
+python run_all.py  # 전체 11단계
+```
+
+
+
 ```bash
 pip install -r requirements.txt
 python scripts/run_all.py

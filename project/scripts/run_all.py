@@ -12,6 +12,7 @@ Run the full analysis pipeline.
     python scripts/05_fdr_correction.py
     python scripts/06_mediation.py
     python scripts/07_make_figures.py
+    
 """
 
 import subprocess
@@ -27,6 +28,7 @@ STEPS = [
     "05_fdr_correction.py",
     "06_mediation.py",
     "07_make_figures.py",
+    
 ]
 
 
