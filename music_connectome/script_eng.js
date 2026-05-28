@@ -552,6 +552,6 @@ const doc = new Document({
 });
 
 Packer.toBuffer(doc).then(buf => {
-  fs.writeFileSync("/home/claude/work/BCS499_final_report.docx", buf);
-  console.log("saved →", "/home/claude/work/BCS499_final_report.docx");
+    fs.writeFileSync("BCS499_final_report.docx", buf);
+    console.log("saved → BCS499_final_report.docx");    
 });

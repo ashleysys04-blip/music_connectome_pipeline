@@ -1,0 +1,17 @@
+{
+  "name": "music_connectome",
+  "version": "1.0.0",
+  "description": "Analysis pipeline for the BCS499 final project: **Early Musical Training, Episodic Memory, and White-Matter Network Organization**",
+  "main": "script_eng.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "docx": "^9.7.1"
+  },
+  "devDependencies": {}
+}
