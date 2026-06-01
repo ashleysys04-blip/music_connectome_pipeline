@@ -363,19 +363,36 @@ def _all_global(W):
 
 
 def _network_features(W, atlas):
-    """Mean SC weight within/between target networks (DMN/MTL/FPN)."""
+    """Mean SC weight within/between target networks (DMN/MTL/FPN).
+
+    W는 피험자의 full (log1p) SC matrix. 이 mean-weight feature가 피험자 간
+    비교 가능하도록, 평균을 내기 전에 행렬을 [0,1]로 normalize해서
+    피험자 수준의 곱셈적 스케일(head size / total streamline count)을 제거한다
+    (= BCT weight_conversion 'normalize'). raw feature를 쓰고 싶을 때를 위해
+    total_strength도 함께 반환한다 (GLM covariate로 쓸 수 있음).
+    """
+    iu_full = np.triu_indices(W.shape[0], k=1)
+    total_strength = float(np.nansum(W[iu_full]))
+
+    if C.NETWORK_FEATURE_NORMALIZE:
+        mx = np.nanmax(W)
+        Wn = W / mx if mx and mx > 0 else W
+    else:
+        Wn = W
+
     masks = {}
     for short, full_name in C.NETWORKS_OF_INTEREST.items():
         idx = atlas.index[atlas["network"] == full_name].to_numpy()
         masks[short] = idx
-    feats = {}
+
+    feats = {"total_strength": total_strength}
     keys = list(masks.keys())
     for i, k in enumerate(keys):
         idx_i = masks[k]
         if len(idx_i) < 2:
             feats[f"{k}_within"] = np.nan
         else:
-            sub = W[np.ix_(idx_i, idx_i)]
+            sub = Wn[np.ix_(idx_i, idx_i)]
             iu = np.triu_indices(len(idx_i), k=1)
             feats[f"{k}_within"] = float(np.nanmean(sub[iu]))
         for j in range(i + 1, len(keys)):
@@ -383,7 +400,7 @@ def _network_features(W, atlas):
             if len(idx_i) == 0 or len(idx_j) == 0:
                 feats[f"{k}_{kj}_between"] = np.nan
             else:
-                feats[f"{k}_{kj}_between"] = float(np.nanmean(W[np.ix_(idx_i, idx_j)]))
+                feats[f"{k}_{kj}_between"] = float(np.nanmean(Wn[np.ix_(idx_i, idx_j)]))
     return feats
 
 
@@ -407,6 +424,13 @@ def step3():
         for thr in C.GRAPH_THRESHOLDS:
             Wt = threshold_proportional(W, thr)
             Wp = np.where(Wt > 0, Wt, 0.0)
+            # NEW: weighted clustering/small-worldness가 [0,1] weight를 가정하므로 normalize
+            if HAVE_BCT:
+                Wp = bct.weight_conversion(Wp, "normalize")
+            else:
+                mx = Wp.max()
+                if mx > 0:
+                    Wp = Wp / mx
             g = _all_global(Wp)
             rows_all.append({C.COL_SUBJECT_ID: sub, "threshold": thr, **g})
             if thr == C.GRAPH_PRIMARY_THR:

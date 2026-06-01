@@ -89,6 +89,10 @@ GRAPH_PRIMARY_THR = 0.15
 # DSI Studio streamline counts are heavy-tailed; log1p stabilizes them.
 SC_LOG_TRANSFORM = True
 
+# 각 피험자 SC를 max weight로 normalize(BCT weight_conversion 'normalize')한 뒤
+# network within/between 평균을 계산 → head size / total streamline 스케일 제거.
+NETWORK_FEATURE_NORMALIZE = True
+
 PRIMARY_GRAPH_METRICS = [
     "global_efficiency", "char_path_length", "mean_clustering",
     "modularity", "small_worldness",
