@@ -25,6 +25,7 @@ from pathlib import Path
 from scipy.io import loadmat
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
+from statsmodels.stats.outliers_influence import variance_inflation_factor as _vif
 
 import config as C
 
@@ -354,6 +355,7 @@ def _small_world(W, n_rand=5):
     return (Cr / cR) / (Lr / lR)
 
 
+
 def _all_global(W):
     return dict(global_efficiency=_global_eff(W),
                 char_path_length=_char_path(W),
@@ -520,6 +522,28 @@ def step5():
     df = standardize(df, ["age_years", "wisc_mr",
                           "music_onset_age", "log_cumulative_hours",
                           "psm_score", "flanker", "dccs", "lswmt", "pcps"])
+    # --- M3 predictor multicollinearity 진단 (onset–hours 상관 + VIF) ---
+    m3_terms = ["music_onset_age", "log_cumulative_hours"]
+    covs = [c for c in ["age_years", "sex_code", "wisc_mr"]
+            if c in df.columns and df[c].notna().any()]
+    Xv = df[m3_terms + covs].dropna()
+    r_oh = Xv["music_onset_age"].corr(Xv["log_cumulative_hours"])
+    Xc = sm.add_constant(Xv, has_constant="add")
+    vif_rows = []
+    for i, col in enumerate(Xc.columns):
+        if col == "const":
+            continue
+        vif_rows.append({"term": col,
+                         "vif": float(_vif(Xc.values, i)),
+                         "is_m3_predictor": col in m3_terms})
+    vif_df = pd.DataFrame(vif_rows)
+    vif_df["onset_hours_r"] = r_oh
+    vif_df["n"] = len(Xv)
+    vif_df.to_csv(C.OUT_DIR / "vif_music_predictors.csv", index=False)
+    print(f"  onset–hours r = {r_oh:.3f}  (n={len(Xv)})")
+    print(vif_df[["term", "vif"]].to_string(index=False))
+    # --- VIF 끝 ---
+    
     primary = pd.DataFrame(_run_music_models(df, "psm_score"))
     if len(primary):
         m3 = primary[primary["model"] == "M3_both"].copy()

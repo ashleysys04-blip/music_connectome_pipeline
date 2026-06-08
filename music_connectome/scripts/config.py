@@ -95,7 +95,7 @@ NETWORK_FEATURE_NORMALIZE = True
 
 PRIMARY_GRAPH_METRICS = [
     "global_efficiency", "char_path_length", "mean_clustering",
-    "modularity", "small_worldness",
+    "modularity", "small_worldness", 
 ]
 PRIMARY_NETWORK_FEATURES = [
     "DMN_within", "MTL_within", "FPN_within",
