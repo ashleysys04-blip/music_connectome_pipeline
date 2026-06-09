@@ -167,46 +167,45 @@ Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 **그래서 결론**: M3에서 |β_onset| = 0.207 > |β_hours| = 0.158. onset이 hours보다 약간 우세 → **sensitive-period**라고 해석할 수 있음. (근데 둘 다 FDR 비유의(q ≈ 0.13)ㅜㅜㅜ). 그래서 솔직히.. "약하게 onset 우위, 그러나 skeptical view를 배제할 만큼은 아님".
 
 - 4.3.1. 에 정리한거: secondary outcome인 flanker/dccs/lswmt/pcps에도 같은 M1–M4를 돌려 `glm_music_behavior_secondary.csv`에 저장함 — 음악 효과가 PSM에만 특이적인지 보자
-- 별의미없었네요.
+- FDR결과 별 의미없긴 한데 그래도 경향성은 괜찮은듯
 
 ### Step 6 — Music → Brain (`step6`): RQ2, 음악이 뇌 네트워크와 관련 있나?
 
-이번엔 brain feature가 **outcome**입니다. 각 brain feature를 onset + hours로 동시에 예측(M3와 같은 구조), predictor별로 FDR.
+각 brain feature를 onset + hours로 동시에 예측(M3와 같은 구조), predictor별로 FDR.
 
 **실제 결과**: onset·hours 둘 다, 11개 feature 전부 **비유의**(가장 센 게 `DMN_FPN_between` ~ hours, p = .25). 즉 음악 변수로 white-matter 조직을 설명하는 신호 없음.
 
 ### Step 7 — Mediation (`step7`, `_bootstrap_indirect`): onset → brain → PSM 경로가 있나?
 
-"일찍 시작 → 뇌가 바뀜 → 그래서 기억이 좋아짐"이라는 **간접 경로**를 검정합니다.
+"일찍 시작 → 뇌가 바뀜 → 그래서 기억이 좋아짐"이라는 **간접 경로**를 검정
+- a 경로 (predictor → mediator) (step6에서)
+- Gᵢₖ = α₀ + a·Onsetᵢ + α₁Ageᵢ + α₂Sexᵢ + α₃WISCᵢ + εᵢₖ
 
+- b 경로 (mediator → outcome, predictor 통제) (step 4)
+PSMᵢ = γ₀ + c′·Onsetᵢ + b·Gᵢₖ + γ₁Ageᵢ + γ₂Sexᵢ + γ₃WISCᵢ + εᵢ
+
+- a = mediator를 종속변수로 둔 회귀(첫 번째 식)에서 얻은 onset 계수
+- b = PSM을 종속변수로 두고 onset+mediator를 같이 넣은 회귀(두 번째 식)에서 얻은 mediator 계수
+- ab = 이 둘을 곱한 indirect effect. bootstrap 5,000회로 각 resample마다 a, b를 다시 추정→곱→ab 분포를 만들고, 그 95% CI가 0을 포함하는지로 판정
+
+- 다시 정리하면
 - `a` = onset → mediator(brain) 효과
 - `b` = mediator → PSM 효과 (onset 통제한 상태)
-- `ab` = a × b = **간접효과(indirect effect)**
-- 이 ab가 0과 다른지를 **bootstrap 5000회**(`N_BOOTSTRAP`)로 재표집해 95% CI로 판정. CI가 0을 포함하지 않으면 mediation 있음.
+- `ab` = a × b = 구하려는 최종 **간접효과(indirect effect)**
 
-**실제 결과**: 11개 mediator 전부 `ci_excludes_zero = False`, p_boot > 0.40 → mediation 없음. (애초에 a, b 자체가 다 약하니 당연한 귀결.)
+**실제 결과**: 11개 mediator 전부 `ci_excludes_zero = False`, p_boot > 0.40 → mediation 없음. (애초에 a, b 자체가 다 약하니 당연하긴함.)
 
 ---
 
-## 5. 그래서 전체 결론은? (숫자 → 해석)
+## 5. 결론
 
-- **Behavioral (RQ1, 핵심)**: M3에서 onset이 hours보다 약간 우세(−0.207 vs −0.158)하나 둘 다 비유의 → **sensitive-period 시나리오를 약하게 지지**, 단 skeptical view 배제 불가.
+- **Behavioral (RQ1)**: M3에서 onset이 hours보다 약간 우세하나 둘 다 비유의 → **sensitive-period 시나리오를 약하게 지지**, 단 skeptical view 배제 불가.
 - **Brain (RQ2)**: Music → Brain 연관 사실상 없음, Brain → PSM도 (FDR 후) 없음, mediation도 없음 → 이 표본/방법에서 white-matter 조직이 음악-기억 관계를 매개한다는 증거 없음.
 - 평가 기준상 유의성은 필수가 아니므로, 결론은 "예비적으로 onset 쪽으로 기우는 패턴, 효과는 약함"이라는 **시나리오 프레임**으로 진술하면 충분합니다.
 
 ---
 
-## 6. 내가 추가한 normalize 패치가 이 그림을 바꾸나?
-
-- **Behavioral(M1–M4, fig5)은 뇌를 안 쓰므로 그대로** — 닭/달걀 핵심 결과 불변.
-- **Brain 쪽**은 값이 재스케일될 뿐이고, `modularity`와 `small_worldness`는 weight 스케일에 **수학적으로 불변**입니다. 게다가 baseline이 전부 null이라 결론이 안 바뀝니다.
-- 따라서 normalize는 "결과를 갈아엎는 것"이 아니라 **confound(head size·streamline 수)를 통제했다는 robustness 보강**으로 보면 됩니다.
-
-검산 포인트: 패치 후 `glm_brain_behavior.csv`에서 `small_worldness` β ≈ 0.1295, `modularity` β ≈ 0.0653이 **이전과 거의 같게** 나오면 패치가 의도대로 작동한 것입니다(불변 지표는 그대로, 나머지만 재스케일, 어차피 다 null).
-
----
-
-## 부록 — 파일 흐름 한눈에
+## 파일 흐름
 
 ```
 NDA .txt + .mat
