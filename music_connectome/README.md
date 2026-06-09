@@ -139,7 +139,7 @@ Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 - 모든 변수 **z-score 표준화**(`standardize`) → β를 서로 비교 가능하게
 - **covariate**: `age_years`, `sex`, `wisc_mr`(fluid IQ proxy)를 항상 통제
 
-> 다중 회귀 = covariate를 통제한 GLM, β는 **부분 효과(partial effect)**로 해석" — 즉 다른 변수를 고정한 채 그 변수만의 고유 기여.
+> 다중 회귀 = covariate를 통제한 GLM, β는 부분 효과(partial effect)로 해석" — 즉 다른 변수를 고정한 채 그 변수만의 고유 기여.
 
 ### Step 4 — Brain → PSM (`step4`): 뇌가 기억을 설명하나?
 
