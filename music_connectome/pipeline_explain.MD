@@ -70,62 +70,61 @@ NDA에서 받은 여러 `.txt` 파일을 하나의 분석용 표(`analysis_sampl
 
 ---
 
-## 2. Step 2 — structural connectivity 불러오기 (`step2`)
+## 2. Step 2 — structural connectivity 만들기
 
-각 subject의 뇌 연결 행렬(DSI Studio QSDR 출력, Brainnetome 246 영역)을 읽어서 정리합니다.
-
-`_load_sc`가 하는 일:
-- `<SUB>_qsdr_connectivity.mat`에서 key `"connectivity"`로 **246×246 행렬**을 읽음. 이 값은 두 영역을 잇는 **streamline count**(추적된 섬유 가닥 수)입니다.
+`_load_sc`:
+- `<SUB>_qsdr_connectivity.mat`에서 key `"connectivity"`로 **246×246 행렬**을 읽음. 이 값은 두 영역을 잇는 **streamline count**(추적된 섬유 가닥 수)임.
 - `zero_diag`: 대각선(자기 자신과의 연결) 0으로
 - `symmetrize`: A와 A.T 평균 → 대칭 행렬 보장 (연결은 방향이 없으니까)
 
 QC와 안정화:
 - **QC**: 양수 off-diagonal edge가 `MIN_NONZERO_EDGES = 100`개 미만이면 너무 sparse하다고 보고 버림
-- **log1p 변환** (`SC_LOG_TRANSFORM = True`): streamline count도 heavy-tailed라 `log1p(count)`로 압축해서 저장. 이게 graph metric을 안정화합니다.
+- **log1p 변환** (`SC_LOG_TRANSFORM = True`): streamline count도 heavy-tailed라 `log1p(count)`로 압축해서 저장.
 
-정리된 행렬은 `data/processed/sc/<SUB>_sc.npy`로 저장되고, 통과 여부는 `sc_qc.csv`에 기록됩니다.
+정리된 행렬은 `data/processed/sc/<SUB>_sc.npy`로 저장되고, 통과 여부는 `sc_qc.csv`에 기록.
 
 ---
 
-## 3. Step 3 — 뇌를 "숫자"로 요약 (`step3`)
+## 3. Step 3 — 위에서 만든 행렬 숫자로 나타내기 (이게 03 method의 03 metrics 부분임)
 
-뇌 행렬 하나를 회귀에 쓸 수 있는 몇 개의 숫자로 압축합니다. **두 종류**를 만듭니다.
+두 종류 - global graph metrics, network features
 
-### (A) Global graph metrics — 뇌 전체 네트워크의 "모양"
+### (A) Global graph metrics — 뇌 전체 네트워크의 topology (`_all_global`)
 
-먼저 공정 비교를 위한 전처리:
-- `threshold_proportional(W, p)`: 각 subject에서 **가장 강한 상위 p% edge만 남기고** 나머지는 0. `p`는 10%, 15%, 20% 세 가지로 돌리고(`GRAPH_THRESHOLDS`), 15%가 primary(`GRAPH_PRIMARY_THR`). 왜? 사람마다 총 연결량이 다른데, 같은 density(같은 edge 개수)로 맞춰야 "네트워크 모양"을 공정하게 비교할 수 있습니다.
-- **[추가한 패치]** `weight_conversion(..., 'normalize')`로 weight를 [0,1]로 재조정. (clustering 같은 weighted metric이 [0,1] weight를 가정하기 때문)
+전처리:
+- `threshold_proportional(W, p)`: 각 subject에서 **가장 강한 상위 p% edge만 남기고** 나머지는 0. `p`는 10%, 15%, 20% 세 가지로 돌리고(`GRAPH_THRESHOLDS`), 15%가 primary(`GRAPH_PRIMARY_THR`). 이유: 사람마다 총 연결량이 다른데, 같은 density(같은 edge 개수)로 맞춰야 "네트워크 모양"을 공정하게 비교 가능함.
 
-그 위에서 5개 지표를 계산합니다(`_all_global`). 각각의 의미:
+- `weight_conversion(..., 'normalize')`로 weight를 [0,1]로 정규화
 
-| 지표 | 직관적 의미 | 분류 |
+`_all_global`: 수업시간에 배웠던 다양한 measure 방법들 수식 이용해서 apply하기
+
+| 변수 | 의미 복습 | 분류 |
 |---|---|---|
 | `global_efficiency` | 정보가 네트워크 전체로 **얼마나 빨리/쉽게** 퍼지나 | integration |
 | `char_path_length` | 두 영역 사이 평균 최단 경로 길이 (길수록 integration ↓) | integration |
 | `mean_clustering` | 내 이웃들끼리도 서로 연결돼 있나 (국소적 뭉침) | segregation |
 | `modularity` | 네트워크가 **모듈(하위 그룹)로 깔끔히 나뉘나** | segregation |
-| `small_worldness` | clustering은 높으면서 경로는 짧은 "small-world" 정도 | 종합 |
+| `small_worldness` | clustering은 높으면서 경로는 짧은 "small-world" 정도 | - |
 
 저장: `graph_metrics.csv`(primary 15%), `graph_metrics_all_thr.csv`(세 threshold 전부).
 
-> 참고: `small_worldness`는 무작위 네트워크(null model)와 비교해야 해서 `randmio_und`로 degree를 보존한 채 5번 무작위화하여 기준값을 만듭니다. 클래스 프로젝트라 5회로 줄여놨고, 논문 수준이면 50~100회입니다.
+- `small_worldness`는 null model랑 이따가 비교할거임
 
-### (B) Network features — 특정 시스템 안/사이의 연결 강도 (`_network_features`)
+### (B) Network features — episodic memory와 관련된 애들에서만 강도를 보자 (`_network_features`)
 
-graph metric이 "뇌 전체 모양"이라면, 이건 **episodic memory와 관련된 특정 시스템**만 콕 집어 봅니다. Brainnetome 246 영역에 붙은 Yeo 7-network 라벨로 영역들을 묶습니다.
+Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 
-- 관심 시스템 3개(`NETWORKS_OF_INTEREST`):
-  - **DMN** (Default mode network) — 기억 인출
-  - **FPN** (Frontoparietal) — 인지 control
-  - **MTL** (여기선 Yeo의 Limbic) — hippocampus 등 memory 핵심
+- `NETWORKS_OF_INTEREST`:
+  - **DMN** (Default mode network) — 기억 관련...
+  - **FPN** (Frontoparietal) — 인지 능력.
+  - **MTL** (Yeo의 Limbic) — hippocampus 등 memory 핵심!
 - **within**: 그 시스템 내부 ROI들끼리의 평균 연결강도 (예: `DMN_within`)
 - **between**: 두 시스템 사이의 평균 연결강도 (예: `DMN_FPN_between`)
-- **[추가한 패치]** subject별로 행렬을 normalize한 뒤 평균을 내고, `total_strength`(전체 연결량 합)도 같이 저장 → head size·총 streamline 수에 따른 스케일 차이를 제거
+- subject별로 행렬을 normalize한 뒤 평균을 내고, `total_strength`(전체 연결량 합)도 같이 저장
 
 저장: `network_features.csv`.
 
-→ 이렇게 Step 3이 끝나면, 각 subject는 **brain feature 한 묶음**(global 5개 + network 6개 = `PRIMARY_GRAPH_METRICS + PRIMARY_NETWORK_FEATURES`)을 갖게 됩니다.
+→ 이렇게 Step 3이 끝나면, 각 subject는 **brain feature 한 묶음**(global 5개 + network 6개 = `PRIMARY_GRAPH_METRICS + PRIMARY_NETWORK_FEATURES`)을 가지게 된다!
 
 ---
 
