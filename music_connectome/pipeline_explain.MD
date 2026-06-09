@@ -1,28 +1,29 @@
-# 내 파이프라인이 실제로 뭘 한 건지 — 코드 기반 친절 설명
+# 한국어 버전 readme
 
-> 이 문서는 report용이 아니라 **내가 이해하기 위한 용도**입니다.
-> 전문 용어(episodic memory, structural connectivity, global efficiency 등)는 영어 그대로 둡니다.
-> 모든 설명은 `music_connectome/scripts/pipeline.py`와 `config.py`의 **실제 코드**를 따라갑니다.
+> 한국어 버전으로 raw하게 쓴 버전. (삭제 예정)
 
 ---
 
-## 0. 큰 그림 — 이 분석이 답하려는 질문
+## 0. 큰 그림
 
-음악을 일찍 시작한 것(**onset age**)이 좋은가, 아니면 그냥 누적으로 많이 연습한 것(**cumulative hours**)이 좋은가? 이게 닭이 먼저냐 달걀이 먼저냐 같은 논쟁입니다. 세 입장이 있습니다.
+음악을 일찍 시작한 것(**onset age**)이 좋은가, 아니면 그냥 누적으로 많이 연습한 것(**cumulative hours**)이 좋은가? 닭이 먼저냐 달걀이 먼저냐 같은 논쟁임
+과연 학부모들이 애들한테 악기시키려는게 진짜 의미가 있는걸까 !!
+카이스트 오케스트라 하면서 악기 붐 세대가 있다는걸 알게되었고, 약간 off the record지만 악기 잘하는 애들이 학점이 좋은거같다...는것이 카이오케의 정 설 (농담.)
 
+이미 있는 입장은 아래 3가지가 있음
 - **Sensitive-period view**: 시작 나이 자체가 중요하다 → onset이 핵심
 - **Dose-response view**: 일찍 시작한 애가 어차피 더 많이 연습하니, 진짜 원인은 총 연습량이다 → hours가 핵심
-- **Skeptical view**: 둘 다 진짜 효과가 아니라 집안 배경·동기 같은 선행 차이의 그림자다 → 둘 다 약함
+- **Skeptical view**: 둘 다 진짜 효과가 아니라 집안 배경·동기 같은 선행 차이의 그림자다 → 위에 둘 다 의미없어!
 
-판별 방법은 단순합니다. **onset과 hours를 같은 회귀모형에 같이 넣고**(이게 `M3`), 어느 쪽 부분 회귀계수 β가 더 크게/유의하게 살아남는지 봅니다. 이게 전체 분석의 심장입니다.
+**onset과 hours를 같은 회귀모형에 같이 넣고**(이게 뒤에 나올 모델 중 `M3`), 어느 쪽 부분 회귀계수 β가 더 크게/유의하게 살아남는지 보자.
 
-분석 대상(outcome)은 episodic memory, 구체적으로 **Picture Sequence Memory (PSM)** 점수입니다. 그리고 뇌 쪽으로는 **white-matter structural connectome**의 조직(organization)이 음악과 관련 있는지 봅니다.
+분석 대상(outcome)은 episodic memory, 구체적으로 **Picture Sequence Memory (PSM)** 점수를 선정함. 그리고 뇌 쪽으로는 **white-matter structural connectome**의 조직(organization)이 음악과 관련 있는지 관찰할 예정임.
 
 ---
 
 ## 1. Step 1 — 데이터 준비 (`step1`)
 
-NDA에서 받은 여러 `.txt` 파일을 하나의 분석용 표(`analysis_sample.csv`)로 합치는 단계입니다.
+NDA에서 받은 여러 `.txt` 파일을 하나의 분석용 표(`analysis_sample.csv`)로 합치는 단계.
 
 ### 어떤 파일에서 뭘 뽑았나
 
@@ -36,9 +37,7 @@ NDA에서 받은 여러 `.txt` 파일을 하나의 분석용 표(`analysis_sampl
 
 ### 음악 변수를 어떻게 "계산"했나 (`derive_music_variables`)
 
-`saiq01.txt`엔 onset age나 총 시간이 **직접 들어있지 않습니다.** 4개의 원자료로부터 직접 만듭니다.
-
-- 원자료 4개:
+- `saiq01.txt`에 있는 데이터 4개:
   - `ccf_sai_p_music_nyr` = 훈련 햇수 (years)
   - `ccf_sai_p_music_nmonth` = 1년 중 활동한 개월 수 (months/year)
   - `ccf_sai_p_music_perwk` = 주당 일수 (days/week)
@@ -49,7 +48,6 @@ NDA에서 받은 여러 `.txt` 파일을 하나의 분석용 표(`analysis_sampl
   age_years = interview_age / 12
   music_onset_age = age_years − music_years
   ```
-  "지금 12살인데 5년 배웠으면 7살에 시작했다"는 단순 역산입니다.
 
 - **cumulative hours** = 모든 시간 단위를 곱해서 총 시간으로
   ```
