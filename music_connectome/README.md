@@ -121,7 +121,7 @@ Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 - `NETWORKS_OF_INTEREST`:
   - **DMN** (Default mode network) — 기억 관련...
   - **FPN** (Frontoparietal) — 인지 능력.
-  - **MTL** (Yeo의 Limbic) — hippocampus 등 memory 핵심!
+  - **MTL** hippocampus 등 memory 핵심!
 - **within**: 그 시스템 내부 ROI들끼리의 평균 연결강도 (예: `DMN_within`)
 - **between**: 두 시스템 사이의 평균 연결강도 (예: `DMN_FPN_between`)
 - subject별로 행렬을 normalize한 뒤 평균을 내고, `total_strength`(전체 연결량 합)도 같이 저장
