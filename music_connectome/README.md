@@ -7,8 +7,12 @@
 ## 0. 큰 그림
 
 음악을 일찍 시작한 것(**onset age**)이 좋은가, 아니면 그냥 누적으로 많이 연습한 것(**cumulative hours**)이 좋은가? 닭이 먼저냐 달걀이 먼저냐 같은 논쟁임
+
 과연 학부모들이 애들한테 악기시키려는게 진짜 의미가 있는걸까 !!
+
 카이스트 오케스트라 하면서 악기 붐 세대가 있다는걸 알게되었고, 약간 off the record지만 악기 잘하는 애들이 학점이 좋은거같다...는것이 카이오케의 정 설 (농담.)
+
+
 연구는 자기가 좋아하는걸로 하라고 하길래 이걸로 한번 해봄. 난진짜클래식음악이정말좋아서미칠거같음.
 
 이미 있는 입장은 아래 3가지가 있음
@@ -130,12 +134,12 @@ Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 
 ## 4. Analyze
 
-4개 GLM 분석 전부 공통 규칙이 있습니다:
+생각해보니 음악을 안 배운 사람에 대해서는 분석할 게 없다는걸 깨달음..데이터 너무 없어졌다..ㅠㅠ:
 - **trained-only**: 음악을 배운 사람(`music_training_status == 1`)만 사용 (onset/hours가 정의되는 사람들)
 - 모든 변수 **z-score 표준화**(`standardize`) → β를 서로 비교 가능하게
 - **covariate**: `age_years`, `sex`, `wisc_mr`(fluid IQ proxy)를 항상 통제
 
-"다중 회귀 = covariate를 통제한 GLM, β는 **부분 효과(partial effect)**로 해석" — 즉 다른 변수를 고정한 채 그 변수만의 고유 기여.
+> 다중 회귀 = covariate를 통제한 GLM, β는 **부분 효과(partial effect)**로 해석" — 즉 다른 변수를 고정한 채 그 변수만의 고유 기여.
 
 ### Step 4 — Brain → PSM (`step4`): 뇌가 기억을 설명하나?
 
@@ -143,26 +147,27 @@ Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 
 **실제 결과**: `small_worldness`만 보정 전 p = 0.019(t = 2.35)로 살짝 떴다가, **FDR 보정 후 q = 0.21 → 비유의**. 나머지는 전부 null. 즉 뇌 지표로 episodic memory를 설명하는 강한 신호는 없음.
 
-### Step 5 — Music → PSM (`step5`, `_run_music_models`): ★ 핵심, 닭/달걀 ★
+### ★ Step 5 — Music → PSM (`step5`, `_run_music_models`)
 
-같은 outcome(PSM)에 대해 **모형 4개**를 비교합니다.
+같은 outcome(PSM)에 대해 **Model 4개**를 비교.
 
-| 모형 | predictor | 실제 β (p) |
+| Model | predictor | 실제 β (p) |
 |---|---|---|
 | **M1** onset only | onset | β = −0.092 (p = .30) |
 | **M2** hours only | hours | β = −0.039 (p = .63) |
 | **M3** both | onset, hours | β_onset = **−0.207** (p = .073), β_hours = −0.158 (p = .129) |
 | **M4** + interaction | onset, hours, onset×hours | 상호작용 β = 0.030 (p = .74, 즉 없음) |
 
-여기서 핵심 현상이 **suppressor effect**입니다. onset만 넣었을 때(M1)는 β가 −0.092로 약했는데, hours와 **같이** 넣으니(M3) −0.207로 **오히려 커졌습니다.** 왜 이런 일이?
+- **suppressor effect**: onset만 넣었을 때(M1)는 β가 −0.092로 약했는데, hours와 같이 넣으니(M3) −0.207로 커짐. 이유는 아래와 같음.
 
-- onset과 hours는 서로 강하게 얽혀 있습니다(일찍 시작 → 보통 더 많이 연습). 둘이 공유하는 분산이 서로의 효과를 가립니다.
-- 둘을 같이 모형에 넣으면 그 공유분이 통제되면서, 각자의 **고유 효과**가 드러나 β가 커집니다.
-- 이게 `fig5_suppressor.png`가 M1→M3 화살표로 강조하는 그림입니다.
+- onset과 hours는 서로 correlated(일찍 시작 → 보통 더 많이 연습).
+- 둘을 같이 모형에 넣으면 그 shared variation이 control되면서, 각자의 고유 효과가 드러나 β가 커짐.
+- `fig5_suppressor.png`에서 이쁘게 정리함
 
-**닭/달걀 판정 읽는 법**: M3에서 |β_onset| = 0.207 > |β_hours| = 0.158. onset이 hours보다 약간 우세 → **sensitive-period 쪽으로 살짝 기울지만** 둘 다 FDR 비유의(q ≈ 0.13). 그래서 정직한 결론은 "약하게 onset 우위, 그러나 skeptical view를 배제할 만큼은 아님". 평가 기준이 "유의성 불필요, 시나리오별 해석 프레임"이라 이게 정확히 맞는 진술 방식입니다.
+**그래서 결론**: M3에서 |β_onset| = 0.207 > |β_hours| = 0.158. onset이 hours보다 약간 우세 → **sensitive-period**라고 해석할 수 있음. (근데 둘 다 FDR 비유의(q ≈ 0.13)ㅜㅜㅜ). 그래서 솔직히.. "약하게 onset 우위, 그러나 skeptical view를 배제할 만큼은 아님".
 
-(secondary outcome인 flanker/dccs/lswmt/pcps에도 같은 M1–M4를 돌려 `glm_music_behavior_secondary.csv`에 저장 — 음악 효과가 PSM에만 특이적인지 보려는 대조군 성격.)
+- 4.3.1. 에 정리한거: secondary outcome인 flanker/dccs/lswmt/pcps에도 같은 M1–M4를 돌려 `glm_music_behavior_secondary.csv`에 저장함 — 음악 효과가 PSM에만 특이적인지 보자
+- 별의미없었네요.
 
 ### Step 6 — Music → Brain (`step6`): RQ2, 음악이 뇌 네트워크와 관련 있나?
 
