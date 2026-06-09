@@ -128,7 +128,7 @@ Brainnetome 246 영역에 Yeo 7-network 라벨 붙어있음. 이거를 이용
 
 ---
 
-## 4. 분석 4종 — 무엇으로 무엇을 예측했나
+## 4. Analyze
 
 4개 GLM 분석 전부 공통 규칙이 있습니다:
 - **trained-only**: 음악을 배운 사람(`music_training_status == 1`)만 사용 (onset/hours가 정의되는 사람들)
