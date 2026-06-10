@@ -37,22 +37,22 @@ Episodic Memory's White Matter?}\\[0.3em]
 % ==================================================================
 \begin{abstract}
 \noindent
-Early music training is widely believed to enhance children's cognitive development, but the underlying causal story remains contested. Three competing explanations have shaped the literature: a \emph{sensitive-period} account (when training starts matters), a \emph{dose-response} account (how much one trains matters), and a \emph{skeptical} account (apparent effects reduce to confounding). I used HCP-D data ($N=473$ with usable structural connectomes; trained-only $n\approx183$) to test these scenarios on episodic memory, operationalized via the Picture Sequence Memory (PSM) task. Music onset age and cumulative log-hours of training were entered into a single multiple regression (M3) so their partial effects could be compared on a common scale. Across 11 graph-theoretic features of the white-matter connectome (global efficiency, modularity, small-worldness, characteristic path length, and within/between-network strength for DMN, FPN, and MTL), only small-worldness reached nominal significance with PSM ($\beta=+0.13$, raw $p=0.019$; FDR n.s.). The music-side results showed a textbook \emph{suppressor pattern}: onset's partial coefficient grew from $\beta=-0.092$ in M1 to $\beta=-0.207$ in M3 once cumulative hours was controlled, while hours' partial effect remained smaller in magnitude ($\beta=-0.158$). Bootstrap mediation across all 11 brain features yielded no indirect effects (all 95\% CIs included zero). Together, the data lean toward the sensitive-period scenario in direction and effect-size ordering, but neither $\beta$ reached $p<0.05$, and the absence of mediation implies that---if a sensitive-period effect exists in HCP-D---it does not travel through macroscale white-matter topology.
+Early music training is widely believed to help children's cognitive development, but it is still unclear whether the training itself is the real cause. Three main views appear in the literature: a \emph{sensitive-period} account (when training starts matters), a \emph{dose-response} account (how much one trains matters), and a \emph{skeptical} account (apparent effects mostly come from other factors). I used HCP-D data ($N=473$ with usable structural connectomes; trained-only $n\approx183$) to test these views on episodic memory, measured by the Picture Sequence Memory (PSM) task. Music onset age and cumulative log-hours of training were put into a single regression model (M3) so that their effects could be compared on the same scale. Among the 11 graph features of the white-matter connectome (global efficiency, modularity, small-worldness, characteristic path length, and within/between-network strength for DMN, FPN, and MTL), only small-worldness was related to PSM at a nominal level ($\beta=+0.13$, raw $p=0.019$), and this did not survive FDR correction. On the music side, the onset coefficient became more negative once cumulative hours was controlled (from $\beta=-0.092$ in M1 to $\beta=-0.207$ in M3), and it was somewhat larger in size than the hours coefficient ($\beta=-0.158$). The mediation analysis found no indirect effect for any of the 11 brain features (all 95\% CIs included zero). Overall, the direction of the results leans toward the sensitive-period view, but neither coefficient reached $p<0.05$. The lack of mediation also suggests that, if a sensitive-period effect exists in this sample, it does not seem to work through macroscale white-matter topology.
 \end{abstract}
 
 % ==================================================================
 \section{Background and Significance}
-My motivation for this project began with a common parental intuition: that early musical exposure makes children smarter. Many parents enroll their children in piano lessons before elementary school, hoping the experience will sharpen the brain. The popular literature reinforces this idea, but the empirical literature does not speak with one voice. Whether music training causally improves general cognition has been debated for decades, and the debate has the structure of a chicken-and-egg problem.
+My motivation for this project began with a common parental intuition: that early musical exposure makes children smarter. Many parents enroll their children in piano lessons before elementary school, hoping the experience will sharpen the brain. The popular literature reinforces this idea, but the empirical literature does not agree. Whether music training really improves general cognition has been debated for a long time, and the problem is a bit like a chicken-and-egg question.
 
 Three positions occupy this debate. First, the \textbf{sensitive-period view} holds that the timing of training matters, that the developing brain has a window during which musical experience can sculpt neural circuitry in ways that mature brains cannot. \citet{steele2013} provided the classic evidence: white-matter integrity in the posterior corpus callosum was systematically related to whether musicians began training before or after age seven, even after matching for total hours. Second, the \textbf{dose-response view} holds that the apparent onset effect is really an hours effect: children who start earlier accumulate more total practice by adulthood, and that cumulative dose is what matters, not the calendar age at first lesson \citep{schellenberg2020}. Third, the \textbf{skeptical view} holds that neither variable carries information once one properly controls for the confounding effects of socioeconomic status, family environment, and pre-existing aptitude \citep{sala2017}.
 
-These three positions cannot be distinguished by simple correlation. Because onset age and cumulative hours are strongly negatively correlated, the relationship of either with cognition is ambiguous. The natural arbiter is a multiple regression that includes both predictors: the partial coefficients on onset and hours, holding the other constant, directly test which scenario fits the data. This is the analytic strategy this project pre-registered.
+These three positions cannot be told apart by a simple correlation. Because onset age and cumulative hours are negatively correlated, the relationship of either one with cognition is hard to interpret on its own. A more useful approach is a multiple regression that includes both predictors at the same time, because the coefficients on onset and hours, with the other held constant, show which view fits the data better. This is the main strategy I used in this project.
 
 Episodic memory is a particularly appropriate behavioral outcome. Music learning is fundamentally sequential. Practice consists of encoding ordered temporal patterns, remembering motor sequences, and binding melodic events to contextual cues. The NIH Toolbox Picture Sequence Memory (PSM) task probes this same machinery: participants reproduce ordered sequences of pictured events. Compared with the broad construct of ``intelligence,'' PSM offers a concrete, well-validated, theoretically motivated dependent variable that is available across all HCP-D participants. For this reason, PSM was selected as the primary cognitive outcome rather than as a proxy for general intelligence.
 
 The white-matter side of the question is motivated by recent connectome-level work showing that structural network topology is itself developmentally dynamic. \citet{mousley2025} reported four major lifespan turning points in white-matter topology (ages 9, 32, 66, and 83) and identified small-worldness as the strongest LASSO-retained predictor of age in the 9--32 epoch, the very epoch that contains the HCP-D age range. If music's sensitive period writes itself into the connectome, this is the developmental window in which we would expect that trace to be detectable.
 
-This study addresses a scientifically meaningful question in developmental neuroscience: how early musical training is related to episodic memory development and whether this relationship is reflected in structural brain connectivity. Despite decades of research on music training and cognition, two important problems remain unresolved. First, there is an identification problem. Because onset age and cumulative training hours are intrinsically correlated, earlier starters tend to accumulate more practice, and their effects on cognition are often confounded. Studies that control for training hours through matching can reduce some group differences, but they cannot directly compare onset age and cumulative practice as competing predictors. This project addresses this gap by estimating their partial effects within a joint model, thereby testing whether training onset explains memory outcomes beyond total training exposure. Second, there is an explanatory-level problem. The cognitive benefits of music training have been reported predominantly at the behavioral level, whereas whether such effects are reflected in the structural organization of the connectome remains less clear, particularly for episodic memory. By linking behavioral memory performance to white-matter network features through mediation analysis, this study asks not only whether an association exists, but also at which neural level it may reside. Moreover, the project targets sequential episodic memory, a theoretically matched cognitive outcome for musical experience, rather than relying on diffuse measures of general intelligence transfer. Beyond its theoretical contribution, the study has practical relevance for the design of early-childhood enrichment, as it may help clarify how caregivers and educators should think about the timing and allocation of developmental resources across the early years.
+This study looks at a meaningful question in developmental neuroscience: how early music training relates to episodic memory, and whether this shows up in the structure of brain connectivity. Even after many years of research on music and cognition, two problems are still not fully solved. The first is that onset age and cumulative training hours are naturally correlated, since children who start earlier usually also train more. This makes their effects on cognition easy to confuse. Studies that match participants on training hours can reduce some group differences, but they do not directly compare onset age and total practice as competing predictors. This project tries to fill that gap by estimating both effects in one model, which lets me check whether onset age explains memory beyond total training. The second problem is about the level of explanation. Most of the reported benefits of music training are at the behavioral level, and it is less clear whether they also appear in the structure of the connectome, especially for episodic memory. By connecting memory performance to white-matter network features through a mediation analysis, this study asks not only whether an association exists, but also at what level it might sit. The project also focuses on sequential episodic memory, which is closely related to music learning, instead of using broad measures of general intelligence. Beyond the theory, the question also has some practical value for early-childhood education, since it may help parents and teachers think about when and how much music training is worth investing in.
 
 % ==================================================================
 \section{Research Questions and Hypotheses}
@@ -165,7 +165,7 @@ The three competing scenarios were therefore defined as follows:
 \section{Methods}
 
 \subsection{Step 1: Dataset and sample construction}
-Data come from the Human Connectome Project---Development (HCP-D). The starting demographic table contained 652 participants. Music variables were merged from the NDA SAIQ instrument (500 participants, 286 ever-trained). Cognitive variables (PSM, Flanker, DCCS, list sorting, pattern comparison) were merged from the corresponding NIH Toolbox files (611 participants with at least one cognitive score). After requiring a non-missing PSM score, 473 participants remained, all of which had usable structural connectivity matrices after quality control.
+Data come from the Human Connectome Project in Development (HCP-D). The starting demographic table contained 652 participants. Music variables were merged from the NDA SAIQ instrument (500 participants, 286 ever-trained). Cognitive variables (PSM, Flanker, DCCS, list sorting, pattern comparison) were merged from the corresponding NIH Toolbox files (611 participants with at least one cognitive score). After requiring a non-missing PSM score, 473 participants remained, all of which had usable structural connectivity matrices after quality control.
 
 \subsection{Step 2: Music variables}
 Music onset age was estimated as the participant's current age minus their reported total years of training. Participants reporting no training were treated as untrained and excluded from the trained-only analyses. Cumulative hours was estimated from the reported years $\times$ weeks/year $\times$ days/week $\times$ minutes/session, then log-transformed to compress the heavy right tail and stabilize variance.
@@ -397,7 +397,7 @@ Second, we tested whether music-training history predicted episodic memory perfo
 
 
 \paragraph{Step 6: Music $\rightarrow$ Brain.}
-Third, we tested whether music-training variables were associated with structural connectome organization. Each of the 11 graph features was used as an outcome variable. Onset age and log-hours were tested in separate covariate-adjusted models:
+Third, we tested whether music-training variables were associated with structural connectome organization. Each of the 11 graph features was used as an outcome variable. Onset age and log-hours were entered jointly into a single covariate-adjusted model, so that each variable's partial effect was estimated holding the other constant:
 \[
 G_{ik}
 =
@@ -405,34 +405,20 @@ G_{ik}
 +
 \beta_1 \mathrm{Onset}_i
 +
-\beta_2 \mathrm{Age}_i
+\beta_2 H_i
 +
-\beta_3 \mathrm{Sex}_i
+\beta_3 \mathrm{Age}_i
 +
-\beta_4 \mathrm{WISC}_i
+\beta_4 \mathrm{Sex}_i
 +
-\epsilon_{ik},
-\]
-and
-\[
-G_{ik}
-=
-\beta_0
-+
-\beta_1 H_i
-+
-\beta_2 \mathrm{Age}_i
-+
-\beta_3 \mathrm{Sex}_i
-+
-\beta_4 \mathrm{WISC}_i
+\beta_5 \mathrm{WISC}_i
 +
 \epsilon_{ik}.
 \]
-This step asked whether earlier music onset or greater cumulative training was reflected in white-matter network topology. Because 11 graph features were tested for each of two music predictors, this step involved 22 music--brain association tests. The available sample size for this analysis was $n=175$.
+This step asked whether earlier music onset or greater cumulative training was reflected in white-matter network topology. Because each of the 11 graph features yielded a partial coefficient for both onset age and log-hours, this step produced 22 music--brain partial-effect tests. The available sample size for this analysis was $n=175$.
 
 \paragraph{Step 7: Mediation analysis.}
-Finally, we tested whether the association between music onset age and PSM could be statistically explained by structural connectome features. For each graph feature $G_k$, a mediation model was estimated with onset age as the predictor, the graph feature as the mediator, and PSM as the outcome. The first path estimated whether onset age predicted the brain feature:
+Finally, we tested whether the association between music onset age and PSM could be statistically explained by structural connectome features. For each graph feature $G_k$, a mediation model was estimated with onset age as the predictor, the graph feature as the mediator, and PSM as the outcome. Log cumulative hours $H_i$ was included as a covariate in both paths, so the mediation estimates the onset effect holding cumulative training constant. The first path estimated whether onset age predicted the brain feature:
 \[
 G_{ik}
 =
@@ -446,9 +432,11 @@ a\,\mathrm{Onset}_i
 +
 \alpha_3 \mathrm{WISC}_i
 +
+\alpha_4 H_i
++
 \epsilon_{ik}^{(a)}.
 \]
-The second path estimated whether the brain feature predicted PSM after controlling for onset age:
+The second path estimated whether the brain feature predicted PSM after controlling for onset age and cumulative hours:
 \[
 \mathrm{PSM}_i
 =
@@ -463,6 +451,8 @@ b\,G_{ik}
 \gamma_2 \mathrm{Sex}_i
 +
 \gamma_3 \mathrm{WISC}_i
++
+\gamma_4 H_i
 +
 \epsilon_i^{(b)}.
 \]
@@ -499,7 +489,7 @@ The trained subsample ($n=201$ with complete music variables) has an onset age d
 
 \subsection{Brain $\to$ PSM (Step 4)}
 
-Figure~\ref{fig:brainpsm} summarizes the standardized coefficients from the 11 separate covariate-adjusted regressions testing whether each white-matter graph feature predicted PSM. Among the 11 features, small-worldness showed the largest positive association with PSM ($\beta=+0.130$, raw $p=0.019$), followed by modularity. Several features had coefficients close to zero, whereas FPN within-network strength and characteristic path length showed negative coefficients. However, none of the associations survived FDR correction; all corrected $q$-values exceeded 0.21. Thus, Step 4 provides only a nominal brain--behavior signal rather than confirmatory evidence. The positive direction of small-worldness is nevertheless consistent with the idea that better episodic memory may be related to a more balanced integration--segregation profile in the developing structural connectome.
+Figure~\ref{fig:brainpsm} shows the standardized coefficients from the 11 covariate-adjusted regressions that tested whether each white-matter graph feature predicted PSM. Among the 11 features, small-worldness had the largest positive coefficient with PSM ($\beta=+0.130$, raw $p=0.019$), followed by modularity. Several features were close to zero, while FPN within-network strength and characteristic path length were negative. None of these survived FDR correction (all $q$-values above 0.21), so Step 4 gives only a weak, nominal brain--behavior signal. The positive direction of small-worldness still fits the idea that better episodic memory may go with a more balanced integration--segregation profile in the developing connectome.
 
 \begin{figure}[ht]
 \centering
@@ -510,7 +500,7 @@ Figure~\ref{fig:brainpsm} summarizes the standardized coefficients from the 11 s
 
 \subsection{Music $\to$ PSM (Step 5)}
 
-Before turning to the adjusted regression models, the raw group-level pattern shows why this analysis required a joint model. In the unadjusted boxplot, the late-onset group has a slightly higher median PSM score than the early- or middle-onset groups (Fig.~\ref{fig:rawpsm}). Taken at face value, this descriptive pattern appears inconsistent with a sensitive-period account. However, the raw comparison does not adjust for developmental and training-history differences. In HCP-D, later starters tend to be older, and older participants have more developmentally mature PSM performance. The raw plot therefore mixes onset timing with age and cumulative training history.
+Before looking at the adjusted models, the raw group pattern already shows why a joint model is needed. In the unadjusted boxplot, the late-onset group has a slightly higher median PSM score than the early- or middle-onset groups (Fig.~\ref{fig:rawpsm}). Taken at face value, this descriptive pattern appears inconsistent with a sensitive-period account. However, the raw comparison does not adjust for developmental and training-history differences. In HCP-D, later starters tend to be older, and older participants have more developmentally mature PSM performance. The raw plot therefore mixes onset timing with age and cumulative training history.
 
 \begin{figure}[ht]
 \centering
@@ -519,15 +509,9 @@ Before turning to the adjusted regression models, the raw group-level pattern sh
 \label{fig:rawpsm}
 \end{figure}
 
-The adjusted nested models clarify this reversal. In the marginal regressions, neither onset age alone (M1: $\beta=-0.092$, $p=0.30$) nor cumulative hours alone (M2: $\beta=-0.039$, $p=0.63$) reached significance. In the primary joint model M3, however, onset age became more strongly negative ($\beta=-0.207$, $p=0.073$), whereas cumulative hours remained smaller in magnitude ($\beta=-0.158$, $p=0.129$). Thus, once shared variance with cumulative hours was separated, the onset coefficient more than doubled in magnitude. The onset $\times$ hours interaction in M4 was effectively zero ($\beta=+0.030$, $p=0.742$), indicating that the pattern was additive rather than dependent on a training-hours threshold.
+The adjusted models explain this reversal. When entered alone, neither onset age (M1: $\beta=-0.092$, $p=0.30$) nor cumulative hours (M2: $\beta=-0.039$, $p=0.63$) was significant. In the joint model M3, onset age became more negative ($\beta=-0.207$, $p=0.073$), while cumulative hours stayed smaller in size ($\beta=-0.158$, $p=0.129$). So once the shared variance with hours was removed, the onset coefficient grew clearly larger. The onset $\times$ hours interaction in M4 was about zero ($\beta=+0.030$, $p=0.742$), which means the two predictors mostly add up rather than depending on each other.
 
-The headline result of the project is the comparison of M1, M2, and M3 (Table~\ref{tab:nested}, Fig.~\ref{fig:suppressor}). In M3, the absolute onset coefficient was larger than the absolute hours coefficient:
-\[
-\frac{|\beta_{\mathrm{onset}}|}{|\beta_{\mathrm{hours}}|}
-=
-\frac{0.207}{0.158}
-\approx 1.31.
-\]
+The main result of the project is the comparison of M1, M2, and M3 (Table~\ref{tab:nested}, Fig.~\ref{fig:suppressor}). In M3, the onset coefficient was larger in size than the hours coefficient, with a ratio of about $0.207/0.158\approx 1.31$.
 
 \begin{table}[ht]
 \centering
@@ -555,18 +539,11 @@ M4 ($+$ interaction) & onset $\times$ hours  & $+0.030$ & 0.742 \\
 \label{fig:suppressor}
 \end{figure}
 
-This pattern is diagnostic. A pure dose-response account would predict that the hours coefficient should be the larger coefficient once both predictors are entered, and that it should be positive. Instead, the relative ordering was the opposite: the onset coefficient was larger in magnitude than the hours coefficient, with
-\[
-\frac{|\beta(\mathrm{onset})|}{|\beta(\mathrm{hours})|}
-=
-\frac{0.207}{0.158}
-\approx 1.31.
-\]
-The negative onset coefficient is consistent with the sensitive-period prediction that later onset is associated with lower PSM. By contrast, the negative hours coefficient does not support a positive dose-response interpretation. The interaction's near-zero value further rules out the sub-hypothesis that the onset effect depends on having reached some cumulative training threshold.
+This pattern is informative. A pure dose-response account would expect the hours coefficient to be the larger one once both predictors are included, and to be positive. The data show the opposite: the onset coefficient was larger than the hours coefficient (the ratio above, $\approx 1.31$). The negative onset coefficient fits the sensitive-period idea that later onset goes with lower PSM. The negative hours coefficient does not fit a positive dose-response story. The near-zero interaction also suggests the onset effect does not depend on reaching some amount of training.
 
-In M3, onset age and log cumulative hours were weakly negatively correlated ($r=-0.27$), but their variance inflation factors were 2.37 and 2.14, respectively, well below the conventional threshold of 5. The observed suppressor effect therefore reflects the separation of the two predictors' partial effects once their shared variance is controlled, rather than estimation instability arising from multicollinearity.
+In M3, onset age and log cumulative hours were only weakly correlated ($r=-0.27$), and their variance inflation factors were 2.37 and 2.14, both well below the usual cutoff of 5. So the change in the onset coefficient comes from separating the two predictors' effects, not from multicollinearity making the estimates unstable.
 
-Overall, the M3 pattern is directionally consistent with H1a: onset age had the larger absolute partial coefficient, and its sign was negative. However, because neither coefficient reached conventional significance, this result should be interpreted as exploratory support for an onset-dominant pattern rather than confirmatory evidence for a sensitive-period effect.
+Overall, the M3 pattern points in the direction of H1a: onset age had the larger coefficient and it was negative. But since neither coefficient reached significance, I read this as weak, exploratory support for an onset-dominant pattern, not as firm evidence for a sensitive period.
 
 \subsubsection{Secondary cognitive outcomes: specificity of the effect}
 
@@ -581,7 +558,7 @@ To test whether the PSM effect is specific to episodic memory or instead reflect
 \toprule
 Outcome (domain) & onset $\beta$ & hours $\beta$ & onset $p$ & $|\beta_{\text{onset}}|/|\beta_{\text{hours}}|$ \\
 \midrule
-\textbf{PSM} (episodic memory, reference) & \textbf{$-0.207$} & $-0.158$ & $0.073$ & $1.31$ \\
+\textbf{PSM} (episodic memory, reference) & $\mathbf{-0.207}$ & $-0.158$ & $0.073$ & $1.31$ \\
 DCCS (cognitive flexibility) & $-0.232$ & $-0.015$ & $0.054$ & $15.0$ \\
 List Sorting (working memory) & $-0.189$ & $-0.141$ & $0.119$ & $1.34$ \\
 Pattern Comparison (processing speed) & $-0.122$ & $+0.054$ & $0.288$ & $2.28$ \\
@@ -591,13 +568,13 @@ Flanker (inhibitory control) & $-0.043$ & $+0.128$ & $0.720$ & $0.34$ \\
 }
 \end{table}
 
-No secondary outcome survived FDR correction, and the trained-only sample ($n=183$) is small for multivariate regression. The interpretation below is therefore exploratory: it describes the effect-size pattern rather than providing a confirmatory claim. Even so, two regularities are worth noting. First, onset's partial effect was larger than hours' partial effect in three of the four secondary outcomes: DCCS, List Sorting, and Pattern Comparison. This suggests that the suppressor/sensitive-period pattern observed for PSM in Section~4.3 is not simply an artifact of a single outcome. The onset coefficient for DCCS in particular ($\beta=-0.232$, $p=0.054$) was larger than that for PSM ($\beta=-0.207$) and approached nominal significance.
+No secondary outcome survived FDR correction, and the trained-only sample ($n=183$) is small for a model with several predictors. So the points below are exploratory and describe the general pattern rather than a firm result. Even so, two things stand out. First, the onset coefficient was larger than the hours coefficient in three of the four secondary outcomes (DCCS, List Sorting, and Pattern Comparison). This suggests the onset-leaning pattern seen for PSM in Section~4.3 is not just a feature of one single outcome. The onset coefficient for DCCS in particular ($\beta=-0.232$, $p=0.054$) was a little larger than for PSM ($\beta=-0.207$) and was close to significance.
 
-Second, the magnitude of the onset signal varied systematically by domain. It was strongest for tasks involving sequencing, memory, and executive control, namely PSM, DCCS, and List Sorting, but weaker or absent for lower-level processing speed and simple inhibition. Flanker was the sole exception, and was the only outcome for which hours showed a larger coefficient than onset. This gradient is consistent with a near-transfer interpretation. In this interpretation, the trace of music onset is concentrated in cognitive domains closely related to the demands of music learning, such as sequencing, memory, and working control, and is weaker in domains that share less structure with music training. This pattern fits a selective sensitive-period account better than a skeptical account in which the apparent music effect is merely a uniform lift in general cognitive ability. Because all coefficients were FDR-nonsignificant and the trained-only sample was modest, however, this interpretation should be treated as a hypothesis for future work rather than as a definitive conclusion.
+Second, the size of the onset effect seemed to depend on the type of task. It was strongest for tasks that involve sequencing, memory, and executive control (PSM, DCCS, and List Sorting), and weaker or absent for simple processing speed and inhibition. Flanker was the only outcome where hours had a larger coefficient than onset. This pattern looks like near transfer \citep{bigand2022}: the effect of music onset shows up mostly in abilities that are close to what music learning actually trains, such as sequencing and memory, and less in abilities that have little in common with music. This fits a selective sensitive-period idea better than a skeptical one, in which music training would just raise general ability across the board. Still, since none of the coefficients were FDR-significant and the trained-only sample was small, I treat this as an idea for future work rather than a conclusion.
 
 \subsection{Music $\to$ Brain (Step 6)}
 
-Twenty-two regressions were estimated: 11 graph features $\times$ 2 music predictors. None survived FDR correction. The most prominent raw signals were DMN--FPN between-network connectivity with log cumulative hours ($\beta=+0.13$, $p=0.25$) and small-worldness with onset age ($\beta=-0.13$, $p=0.28$). Both effects were too weak to interpret individually, but their directions were broadly consistent with the hypothesized pattern: more practice was associated with stronger between-network connectivity, whereas later onset was associated with less small-world structure.
+Eleven joint regressions were estimated, one per graph feature, each yielding a partial coefficient for onset age and for log cumulative hours (22 partial-effect tests in total). None survived FDR correction. The most prominent raw signals were DMN--FPN between-network connectivity with log cumulative hours ($\beta=+0.13$, $p=0.25$) and small-worldness with onset age ($\beta=-0.13$, $p=0.28$). Both effects were too weak to read much into on their own, but their directions matched what we expected: more practice went with stronger between-network connectivity, and later onset went with less small-world structure.
 
 \subsection{Mediation: Onset $\to$ Brain $\to$ PSM (Step 7)}
 
@@ -610,7 +587,7 @@ Across all 11 candidate mediators, the bootstrap 95\% confidence intervals for t
 \label{fig:mediation}
 \end{figure}
 
-Importantly, the direct effect of onset age on PSM, corresponding to the $c$-path ($\beta=-0.236$), was only minimally attenuated to $c' \approx -0.22$ in every mediator-specific model. This indicates that the onset age $\to$ PSM association does not pass through the macroscale white-matter graph features tested here.
+One more thing to note: the total effect of onset age on PSM (the $c$-path, $\beta=-0.236$) barely changed when each mediator was added, dropping only to about $c' \approx -0.22$ in every model. This means the onset $\to$ PSM link does not really pass through the macroscale white-matter graph features tested here.
 
 
 
@@ -620,37 +597,50 @@ Importantly, the direct effect of onset age on PSM, corresponding to the $c$-pat
 
 \subsection{Verdict on the three scenarios}
 
-The \textbf{sensitive-period scenario} is the best-fitting of the three pre-registered hypotheses, but only weakly. The main support comes from the primary joint model M3: onset age had a larger absolute partial coefficient than cumulative hours, and the onset coefficient was negative, as predicted by H1a. This means that later music onset was associated with lower PSM after cumulative hours and covariates were controlled. However, this support is qualified by two facts. First, neither coefficient reached $p<0.05$, with the primary onset coefficient sitting in the marginal $p\approx0.07$ range. Second, the macroscale mediation pathway was empirically absent. Thus, if a sensitive-period effect is present in this sample, it does not appear to operate through the eleven topology features measured here.
+The \textbf{sensitive-period scenario} fits best out of the three, but only weakly. The main support is M3: onset age had a larger coefficient than cumulative hours, and the onset coefficient was negative, which is what H1a predicts. In other words, later music onset went with lower PSM after hours and the covariates were controlled. Two things hold this back, though. First, neither coefficient reached $p<0.05$, with the onset coefficient sitting around $p\approx0.07$. Second, the mediation through brain features was basically absent. So if a sensitive-period effect is there in this sample, it does not seem to run through the 11 topology features I measured.
 
-The \textbf{dose-response scenario} is weakly disfavored. A pure dose-response account would predict that cumulative hours should be the stronger predictor and that its coefficient should be positive. Instead, after onset age was held constant, the hours coefficient was smaller in magnitude than the onset coefficient and was negative. The interaction was also null, so there was no evidence that high-dose training amplified an onset effect.
+The \textbf{dose-response scenario} is weakly against the data. A pure dose-response account would expect cumulative hours to be the stronger predictor and to be positive. Instead, with onset held constant, the hours coefficient was smaller than the onset coefficient and negative. The interaction was also near zero, so there was no sign that more training amplified an onset effect.
 
-The \textbf{skeptical scenario cannot be confidently rejected}: nothing survives FDR correction, the trained-only sample ($n=183$) is modest for a multi-predictor regression, and---critically---our covariate set (age, sex, fluid reasoning) does not include socioeconomic status or family-environment measures, the very confounders emphasized by the skeptical account. We therefore cannot rule out that the onset pattern partly reflects unmeasured background variables.
+The \textbf{skeptical scenario cannot be confidently rejected}. Nothing survived FDR correction, the trained-only sample ($n=183$) is small for a model with several predictors, and, importantly, my covariates (age, sex, fluid reasoning) do not include socioeconomic status or family environment, which are exactly the confounders the skeptical view cares about. So I cannot rule out that the onset pattern partly reflects background variables I did not measure.
 
 
 \subsection{Why the macroscale connectome may be silent}
-The most informative negative result is the mediation null. \citet{steele2013} localized their sensitive-period effect to the posterior corpus callosum, using fractional anisotropy from tractography---a microstructural and tract-specific measure. Our 11 features are by contrast network-level summaries of the whole-brain graph after thresholding. Two interpretations are plausible:
+Maybe the most useful negative result is the mediation null. \citet{steele2013} found their sensitive-period effect in the posterior corpus callosum, using fractional anisotropy from tractography, which is a microstructural and tract-specific measure. My 11 features are instead network-level summaries of the whole-brain graph after thresholding. Two explanations seem possible:
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
   \item \textbf{Wrong spatial scale.} A localized FA difference in a specific commissural tract may not change network-level topology metrics like small-worldness or modularity. The signal could be there at the tract level and invisible at the global level.
   \item \textbf{Wrong tissue.} Sequence memory depends critically on hippocampal--prefrontal circuitry. Gray-matter volume in MTL or functional connectivity between MTL and FPN may be a more direct substrate than aggregate structural-connectome topology.
 \end{itemize}
-Either way, the appropriate next experiment is not a larger-$N$ replication of the same pipeline; it is a redesign with tract-specific microstructural metrics (FA, RD) in tracts of interest, or with hippocampal/MTL volumetry, applied to the same HCP-D sample.
+Either way, the better next step is probably not to just rerun the same pipeline with a larger $N$. It would be to redesign it with tract-specific microstructure (FA, RD) in tracts of interest, or with hippocampal/MTL volume, on the same HCP-D sample.
 
 \subsection{Connection to the lifespan turning-points framework}
-The single nominally-significant Brain $\to$ PSM signal---small-worldness, $\beta=+0.13$---is not arbitrary. \citet{mousley2025} reported that small-worldness has the largest LASSO coefficient for predicting age in the 9--32 lifespan epoch, the epoch that contains the entire HCP-D age range. That our only behavioral hit is in the same metric the lifespan paper flags as the dominant developmental axis in this age window is at least consistent with the idea that PSM-relevant connectome reorganization in this epoch operates partly through small-worldness. This is a hypothesis the present study cannot resolve---it survives as a finding to follow up.
+The one nominally significant Brain $\to$ PSM signal, small-worldness ($\beta=+0.13$), may not be random. \citet{mousley2025} reported that small-worldness has the largest LASSO coefficient for predicting age in the 9--32 lifespan epoch, which is exactly the epoch that covers the HCP-D age range. The fact that my only behavioral hit is in the same metric that the lifespan paper highlights for this age window is at least consistent with the idea that PSM-related connectome changes in this period partly involve small-worldness. This is just a hypothesis that the present study cannot settle, but it is worth following up.
 
 \subsection{Limitations}
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
-  \item \textbf{Power.} Trained-only $n=183$. The primary M3 onset coefficient sits at $p=0.07$, in the uncomfortable zone where adding 50--100 participants would likely settle the question one way or the other.
-  \item \textbf{Onset coverage.} Only $\approx22\%$ of trained participants started before age 7. The classical Steele-style contrast is underpowered by sample composition, not by sample size.
+  \item \textbf{Power.} Trained-only $n=183$. The M3 onset coefficient sits at $p=0.07$, in an awkward range where adding maybe 50--100 more participants could probably settle the question one way or the other.
+  \item \textbf{Onset coverage.} Only $\approx22\%$ of trained participants started before age 7, so the classical Steele-style early-vs-late contrast is limited by the makeup of the sample, not just its size.
   \item \textbf{Unmeasured confounders.} No socioeconomic-status or family-income covariate was available in the analysis sample, so the skeptical scenario cannot be fully addressed.
   \item \textbf{Self-report.} Music history is retrospective parental/self-report, and cumulative hours is estimated from coarse multiplicative units that compound measurement noise.
-  \item \textbf{Cross-sectional.} Causal direction cannot be separated---``better brain $\to$ earlier start'' remains formally indistinguishable from ``earlier start $\to$ better brain.''
+  \item \textbf{Cross-sectional.} Causal direction cannot be pinned down, so ``better brain $\to$ earlier start'' is still formally indistinguishable from ``earlier start $\to$ better brain.''
   \item \textbf{Macroscale features only.} We did not test tract-specific FA/RD, gray-matter volume, or functional connectivity, any of which could carry the trace that macroscale topology does not.
 \end{itemize}
 
 % ==================================================================
 \section{Conclusion}
-This project asked whether the timing of musical onset leaves a detectable trace in episodic memory and in the macroscale white-matter connectome. Using a pre-registered three-scenario framework, I found: (i) \emph{behavior}---a textbook suppressor pattern in which onset's partial effect on PSM grows from $|\beta|=0.09$ to $|\beta|=0.21$ when cumulative hours is controlled, and is larger in magnitude than hours' partial effect ($p=0.073$, $n=183$), the signature predicted by the sensitive-period scenario; (ii) \emph{brain}---only small-worldness predicts PSM at the nominal level (raw $p=0.019$, FDR n.s.), the same metric lifespan work \citep{mousley2025} identifies as the strongest age predictor for the 9--32 epoch our sample sits in; and (iii) \emph{mediation}---no macroscale topology feature carries the onset $\to$ PSM signal (all 11 indirect-effect 95\% CIs include zero). The honest summary is that the data lean toward the sensitive-period scenario in behavior, but the trace, if real, is not in macroscale white-matter topology. The most productive next step is to redirect the search toward tract-specific microstructure and toward MTL gray-matter and functional measures---exactly the substrates where the original sensitive-period and episodic-memory literatures locate the relevant biology.
+This project asked whether the timing of music onset leaves a trace in episodic memory and in the macroscale white-matter connectome. Using the three-scenario framework, I found three things. For \emph{behavior}, the onset effect on PSM grew from about $|\beta|=0.09$ to $|\beta|=0.21$ once cumulative hours was controlled, and it was larger than the hours effect ($p=0.073$, $n=183$), which is the pattern the sensitive-period view predicts. For the \emph{brain}, only small-worldness predicted PSM at a nominal level (raw $p=0.019$, not FDR-significant), and this is the same metric that lifespan work \citep{mousley2025} flags as the strongest age predictor for the 9--32 epoch that my sample falls in. For \emph{mediation}, none of the macroscale topology features carried the onset $\to$ PSM signal (all 11 indirect-effect 95\% CIs included zero). The honest summary is that the behavioral results lean toward the sensitive-period view, but the trace, if it is real, does not seem to live in macroscale white-matter topology. The most useful next step would be to look instead at tract-specific microstructure and at MTL gray-matter and functional measures, which is where the original sensitive-period and episodic-memory literatures point.
+
+% ==================================================================
+\section{Post-Presentation Reflection and Future Directions}
+This section was written after the presentation, incorporating questions and discussion from peers.
+
+\subsection{Comparison with measures beyond PSM}
+Honestly, if IQ had been available in this dataset, I would have included it, since IQ is the first thing that comes to mind when you think about ``intelligence'' in the most general sense. Still, beyond PSM, I did get some extra results using four more measures (Flanker, DCCS, LSWMT, PCPS).
+
+\subsection{All predictors such as onset age and cumulative hours were $z$-scored}
+Because these variables are on different absolute scales, they were entered into the models as standardized ($z$-scored) values, so that $\beta_{\mathrm{onset}}$ and $\beta_{\mathrm{hours}}$ in M3 could be directly compared. Cumulative hours was log-transformed before $z$-scoring, since its distribution was skewed.
+
+\subsection{Personal interpretation}
+Although neither onset nor hours was significant in M3, the direction of the partial regression coefficients was consistent with the sensitive-period account ($|\beta_{\mathrm{onset}}| > |\beta_{\mathrm{hours}}|$). Given the cross-sectional design, the absence of an SES covariate, and the modest sample size, these data alone cannot settle the chicken-or-egg question. That said, my own intuition is that the sensitive-period hypothesis (H1a) still seems plausible, and I think a much larger and more precise longitudinal dataset, with detailed training histories, could show it more clearly. My plan to have my (future) children learn music is something I have held for a very long time; even if pursuing my own bucket list through raising a child is admittedly a bit selfish, I would still want to do it if I can.
 
 % ==================================================================
 \begin{thebibliography}{9}

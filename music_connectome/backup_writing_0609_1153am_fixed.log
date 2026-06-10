@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.17)  9 JUN 2026 12:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.17)  10 JUN 2026 10:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -509,117 +509,121 @@ al/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
 [7]
 
 [8]
-<figures/fig1_onset_distribution.png, id=164, 433.62pt x 289.08pt>
+<figures/fig1_onset_distribution.png, id=180, 433.62pt x 289.08pt>
 File: figures/fig1_onset_distribution.png Graphic file (type png)
 <use figures/fig1_onset_distribution.png>
 Package pdftex.def Info: figures/fig1_onset_distribution.png  used on input lin
-e 495.
+e 485.
 (pdftex.def)             Requested size: 291.2458pt x 194.17221pt.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 500.
+(hyperref)                removing `math shift' on input line 490.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 500.
+(hyperref)                removing `\to' on input line 490.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 500.
+(hyperref)                removing `math shift' on input line 490.
 
-<figures/fig3_brain_behavior.png, id=167, 505.89pt x 289.08pt>
+<figures/fig3_brain_behavior.png, id=183, 505.89pt x 289.08pt>
 File: figures/fig3_brain_behavior.png Graphic file (type png)
 <use figures/fig3_brain_behavior.png>
-Package pdftex.def Info: figures/fig3_brain_behavior.png  used on input line 50
+Package pdftex.def Info: figures/fig3_brain_behavior.png  used on input line 49
 6.
 (pdftex.def)             Requested size: 328.82707pt x 187.90417pt.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 511.
+(hyperref)                removing `math shift' on input line 501.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 511.
+(hyperref)                removing `\to' on input line 501.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 511.
+(hyperref)                removing `math shift' on input line 501.
 
 
 
 [9 <./figures/fig1_onset_distribution.png>]
-<figures/fig2_psm_by_group.png, id=177, 433.62pt x 289.08pt>
+<figures/fig2_psm_by_group.png, id=193, 433.62pt x 289.08pt>
 File: figures/fig2_psm_by_group.png Graphic file (type png)
 <use figures/fig2_psm_by_group.png>
-Package pdftex.def Info: figures/fig2_psm_by_group.png  used on input line 517.
+Package pdftex.def Info: figures/fig2_psm_by_group.png  used on input line 507.
 
 (pdftex.def)             Requested size: 291.2458pt x 194.17221pt.
 
 
 [10 <./figures/fig3_brain_behavior.png> <./figures/fig2_psm_by_group.png>]
-<figures/fig5_suppressor.png, id=187, 607.068pt x 390.61935pt>
+<figures/fig5_suppressor.png, id=203, 607.068pt x 390.61935pt>
 File: figures/fig5_suppressor.png Graphic file (type png)
 <use figures/fig5_suppressor.png>
-Package pdftex.def Info: figures/fig5_suppressor.png  used on input line 553.
+Package pdftex.def Info: figures/fig5_suppressor.png  used on input line 537.
 (pdftex.def)             Requested size: 328.82707pt x 211.58098pt.
 
 
 [11 <./figures/fig5_suppressor.png>]
 
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 575.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\to' on input line 575.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 575.
+
+
+
 [12]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 598.
+(hyperref)                removing `math shift' on input line 579.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 598.
+(hyperref)                removing `\to' on input line 579.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 598.
+(hyperref)                removing `math shift' on input line 579.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 602.
+(hyperref)                removing `math shift' on input line 579.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 602.
+(hyperref)                removing `\to' on input line 579.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 602.
+(hyperref)                removing `math shift' on input line 579.
 
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 602.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 602.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 602.
-
-<figures/fig4_mediation.png, id=204, 505.89pt x 289.08pt>
+<figures/fig4_mediation.png, id=223, 505.89pt x 289.08pt>
 File: figures/fig4_mediation.png Graphic file (type png)
 <use figures/fig4_mediation.png>
-Package pdftex.def Info: figures/fig4_mediation.png  used on input line 608.
+Package pdftex.def Info: figures/fig4_mediation.png  used on input line 585.
 (pdftex.def)             Requested size: 338.22418pt x 193.27235pt.
 
 
 [13 <./figures/fig4_mediation.png>]
-Overfull \hbox (11.85373pt too wide) in paragraph at lines 631--632
-\T1/cmr/m/n/10.95 sensitive-period ef-fect to the pos-te-rior cor-pus cal-lo-su
-m, us-ing frac-tional anisotropy from tractography---
- []
-
-
 
 [14]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 639.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 639.
+
+
 
 [15]
 
@@ -630,16 +634,16 @@ L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `backup_writing_0609_1153am_fixed.out' has no
 t changed.
-(rerunfilecheck)             Checksum: 74CFE561B32AC97D37CA8626D87B5DF1;4334.
+(rerunfilecheck)             Checksum: 478F40FE80ED5A2C93DD2E9DCA5708F1;5484.
  ) 
 Here is how much of TeX's memory you used:
- 13461 strings out of 473190
- 208610 string characters out of 5715800
+ 13469 strings out of 473190
+ 208720 string characters out of 5715800
  625774 words of memory out of 5000000
- 36493 multiletter control sequences out of 15000+600000
+ 36497 multiletter control sequences out of 15000+600000
  578320 words of font info for 88 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,14n,79p,1949b,561s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,14n,79p,1754b,563s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
@@ -661,11 +665,11 @@ ve/2025/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/local/texlive
 texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb></usr/local/texlive/2025/te
 xmf-dist/fonts/type1/public/cm-super/sfti1095.pfb></usr/local/texlive/2025/texm
 f-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on backup_writing_0609_1153am_fixed.pdf (16 pages, 629906 bytes)
+Output written on backup_writing_0609_1153am_fixed.pdf (16 pages, 631982 bytes)
 .
 PDF statistics:
- 338 PDF objects out of 1000 (max. 8388607)
- 264 compressed objects within 3 object streams
- 52 named destinations out of 1000 (max. 500000)
- 210 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 357 PDF objects out of 1000 (max. 8388607)
+ 283 compressed objects within 3 object streams
+ 56 named destinations out of 1000 (max. 500000)
+ 242 words of extra memory for PDF output out of 10000 (max. 10000000)
 
